@@ -1,26 +1,39 @@
-name: Build unsigned iOS IPA
+name: Build Unsigned iOS IPA
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ "master" ]
+    branches:
+      - main
+      - master
+  workflow_dispatch:
 
 jobs:
   build:
+    name: Build ARM64 Unsigned IPA
     runs-on: macos-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Apply ARM64 patch
+        run: |
+          python3 apply_arm64_patch.py
 
       - name: Show Xcode environment
         run: |
           xcodebuild -version
           xcodebuild -project ChatGPT.xcodeproj -list
 
-      - name: Build unsigned arm64 device app
+      - name: Build ARM64 device app
         run: |
           set -o pipefail
+
           rm -rf build Payload
 
           xcodebuild \
@@ -38,22 +51,44 @@ jobs:
             CONFIGURATION_BUILD_DIR="$PWD/build" \
             build | tee xcodebuild.log
 
-      - name: Verify and package IPA
+      - name: Verify ARM64 app
         run: |
           set -euxo pipefail
 
           APP="$(find build -maxdepth 2 -type d -name 'ChatGPT.app' | head -1)"
-          test -n "$APP"
-          test -f "$APP/ChatGPT"
+
+          if [ -z "$APP" ]; then
+            echo "ChatGPT.app was not produced"
+            exit 1
+          fi
+
+          echo "App: $APP"
 
           file "$APP/ChatGPT"
-          lipo -info "$APP/ChatGPT" || true
+          lipo -info "$APP/ChatGPT"
 
+      - name: Package unsigned IPA
+        run: |
+          set -euxo pipefail
+
+          APP="$(find build -maxdepth 2 -type d -name 'ChatGPT.app' | head -1)"
+
+          rm -rf Payload
           mkdir Payload
-          cp -R "$APP" Payload/
 
-          ditto -c -k --sequesterRsrc --keepParent \
-            Payload ChatGPT-Legacy-arm64-unsigned.ipa
+          cp -R "$APP" Payload/ChatGPT.app
+
+          ditto \
+            -c \
+            -k \
+            --sequesterRsrc \
+            --keepParent \
+            Payload \
+            ChatGPT-Legacy-arm64-unsigned.ipa
+
+          ls -lh ChatGPT-Legacy-arm64-unsigned.ipa
+
+          unzip -l ChatGPT-Legacy-arm64-unsigned.ipa | head -50
 
       - name: Upload IPA and build log
         if: always()
@@ -64,3 +99,17 @@ jobs:
             ChatGPT-Legacy-arm64-unsigned.ipa
             xcodebuild.log
           if-no-files-found: warn
+          retention-days: 30
+
+      - name: Build summary
+        if: always()
+        run: |
+          echo "## ChatGPT Legacy ARM64 Build" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -f ChatGPT-Legacy-arm64-unsigned.ipa ]; then
+            echo "✅ Unsigned IPA produced." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Sign the IPA with Ksign before installation." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ IPA was not produced. Check xcodebuild.log." >> "$GITHUB_STEP_SUMMARY"
+          fi
