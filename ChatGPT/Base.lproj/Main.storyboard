@@ -465,42 +465,9 @@
                         </connections>
                     </tableView>
                     <connections>
-                        <outlet property="searchDisplayController" destination="IA6-CW-or0" id="UWx-LI-gas"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qwH-7g-3js" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <searchDisplayController id="0C1-PS-E9x">
-                    <connections>
-                        <outlet property="delegate" destination="4dJ-ht-NLk" id="r4J-TY-UlV"/>
-                        <outlet property="searchContentsController" destination="4dJ-ht-NLk" id="9LL-cP-aGY"/>
-                        <outlet property="searchResultsDataSource" destination="4dJ-ht-NLk" id="Ukv-nX-4B3"/>
-                        <outlet property="searchResultsDelegate" destination="4dJ-ht-NLk" id="14E-k3-wIl"/>
-                    </connections>
-                </searchDisplayController>
-                <searchDisplayController id="T0U-bp-2HQ">
-                    <connections>
-                        <outlet property="delegate" destination="4dJ-ht-NLk" id="o97-XY-fN6"/>
-                        <outlet property="searchContentsController" destination="4dJ-ht-NLk" id="CbG-oe-OWg"/>
-                        <outlet property="searchResultsDataSource" destination="4dJ-ht-NLk" id="j2A-7Z-z4v"/>
-                        <outlet property="searchResultsDelegate" destination="4dJ-ht-NLk" id="TsT-vE-kNh"/>
-                    </connections>
-                </searchDisplayController>
-                <searchDisplayController id="B1q-WS-GnA">
-                    <connections>
-                        <outlet property="delegate" destination="4dJ-ht-NLk" id="VFf-Hm-2yn"/>
-                        <outlet property="searchContentsController" destination="4dJ-ht-NLk" id="dh5-MW-Dbl"/>
-                        <outlet property="searchResultsDataSource" destination="4dJ-ht-NLk" id="cWg-ek-aUc"/>
-                        <outlet property="searchResultsDelegate" destination="4dJ-ht-NLk" id="Pds-qP-dcc"/>
-                    </connections>
-                </searchDisplayController>
-                <searchDisplayController id="IA6-CW-or0">
-                    <connections>
-                        <outlet property="delegate" destination="4dJ-ht-NLk" id="V2i-L8-vJg"/>
-                        <outlet property="searchContentsController" destination="4dJ-ht-NLk" id="gqa-A7-5cR"/>
-                        <outlet property="searchResultsDataSource" destination="4dJ-ht-NLk" id="nKW-0P-fz8"/>
-                        <outlet property="searchResultsDelegate" destination="4dJ-ht-NLk" id="as2-qF-djc"/>
-                    </connections>
-                </searchDisplayController>
                 <pongPressGestureRecognizer allowableMovement="10" minimumPressDuration="0.5" id="4Jm-5f-Ey0">
                     <connections>
                         <action selector="didLongPressCell:" destination="4dJ-ht-NLk" id="E1V-mc-q3a"/>
