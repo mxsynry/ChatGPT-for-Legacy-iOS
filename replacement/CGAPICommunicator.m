@@ -70,7 +70,9 @@
         [NSNotificationCenter.defaultCenter postNotificationName:@"THINK STATUS" object:nil];
     });
 
-    if (apiKey.length == 0) {
+    id storedAPIKey = [[NSUserDefaults standardUserDefaults] objectForKey:@"apiKey"];
+    NSString *openAIAPIKey = [storedAPIKey isKindOfClass:[NSString class]] ? (NSString *)storedAPIKey : nil;
+    if (openAIAPIKey.length == 0) {
         [self cg_finishWithError:@"No OpenAI API key is configured."];
         return;
     }
@@ -111,7 +113,7 @@
     request.HTTPMethod = @"POST";
     request.HTTPBody = jsonData;
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    [request setValue:[NSString stringWithFormat:@"Bearer %@", apiKey] forHTTPHeaderField:@"Authorization"];
+    [request setValue:[NSString stringWithFormat:@"Bearer %@", openAIAPIKey] forHTTPHeaderField:@"Authorization"];
 
     [self cg_sendJSONRequest:request completion:^(NSDictionary *json, NSHTTPURLResponse *response, NSError *error) {
         NSString *problem = [self cg_errorMessageFromJSON:json status:response.statusCode error:error];
@@ -126,7 +128,9 @@
 }
 
 + (void)createImageGenerationWithContent:(NSString *)content {
-    if (apiKey.length == 0) { [self cg_finishWithError:@"No OpenAI API key is configured."]; return; }
+    id storedAPIKey = [[NSUserDefaults standardUserDefaults] objectForKey:@"apiKey"];
+    NSString *openAIAPIKey = [storedAPIKey isKindOfClass:[NSString class]] ? (NSString *)storedAPIKey : nil;
+    if (openAIAPIKey.length == 0) { [self cg_finishWithError:@"No OpenAI API key is configured."]; return; }
     dispatch_async(dispatch_get_main_queue(), ^{
         [NSNotificationCenter.defaultCenter postNotificationName:@"THINK STATUS" object:nil];
     });
@@ -141,7 +145,7 @@
     request.HTTPMethod = @"POST";
     request.HTTPBody = jsonData;
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    [request setValue:[NSString stringWithFormat:@"Bearer %@", apiKey] forHTTPHeaderField:@"Authorization"];
+    [request setValue:[NSString stringWithFormat:@"Bearer %@", openAIAPIKey] forHTTPHeaderField:@"Authorization"];
     [self cg_sendJSONRequest:request completion:^(NSDictionary *json, NSHTTPURLResponse *response, NSError *error) {
         NSString *problem = [self cg_errorMessageFromJSON:json status:response.statusCode error:error];
         if (problem) { [self cg_finishWithError:problem]; return; }
