@@ -109,15 +109,23 @@
     }
 
     self.inputFieldPlaceholder.hidden = NO;
+
+    UILongPressGestureRecognizer *messagePress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleMessageLongPress:)];
+    [self.chatTableView addGestureRecognizer:messagePress];
+}
+
+- (void)dealloc {
+    [NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
 - (void)handleAIResponse:(NSNotification *)notification {
-    CGMessage *Response = notification.object;
+    CGMessage *Response = [notification.object isKindOfClass:[CGMessage class]] ? notification.object : nil;
     [self slideUpTypeView];
+    if (!Response) return;
     [self.messages addObject:Response];
     [self.chatTableView reloadData];
     if(self.viewingPresentTime)
-        [self.chatTableView setContentOffset:CGPointMake(0, self.chatTableView.contentSize.height - self.chatTableView.frame.size.height) animated:YES];
+        [self.chatTableView setContentOffset:CGPointMake(0, MAX(0, self.chatTableView.contentSize.height - self.chatTableView.frame.size.height)) animated:YES];
     
     if (self.messages.count >= 5 && self.messages.count <= 17) {
         if(self.done == NO)
@@ -258,12 +266,7 @@
         if (imageData) {
             ownMessage.imageAttachment = self.attachmentImage.image;
 
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                NSString *encodedImage = [imageData base64EncodedString];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    ownMessage.imageHash = encodedImage;
-                });
-            });
+            ownMessage.imageHash = [imageData base64EncodedString];
         }
     }
     
@@ -290,7 +293,7 @@
     self.attachmentImage.image = nil;
     
     if (self.viewingPresentTime) {
-        [self.chatTableView setContentOffset:CGPointMake(0, self.chatTableView.contentSize.height - self.chatTableView.frame.size.height) animated:YES];
+        [self.chatTableView setContentOffset:CGPointMake(0, MAX(0, self.chatTableView.contentSize.height - self.chatTableView.frame.size.height)) animated:YES];
     }
 }
 
@@ -372,7 +375,8 @@
     
     UIImage* originalImage = [info objectForKey:UIImagePickerControllerEditedImage];
     if (!originalImage) originalImage = [info objectForKey:UIImagePickerControllerOriginalImage];
-    if (!originalImage) originalImage = [info objectForKey:UIImagePickerControllerCropRect];
+    if (![originalImage isKindOfClass:[UIImage class]]) originalImage = nil;
+    if (!originalImage) return;
     
     self.attachmentImage.image = originalImage;
     self.attachmentView.hidden = NO;
@@ -474,6 +478,60 @@
     }
 }
 
+
+
+- (CGMessage *)messageForDisplayRow:(NSInteger)row {
+    NSInteger displayRow = 0;
+    for (CGMessage *message in self.messages) {
+        if (row == displayRow) return message;
+        displayRow++;
+        if (message.imageAttachment) {
+            if (row == displayRow) return message;
+            displayRow++;
+        }
+    }
+    return nil;
+}
+
+- (void)handleMessageLongPress:(UILongPressGestureRecognizer *)gesture {
+    if (gesture.state != UIGestureRecognizerStateBegan) return;
+    NSIndexPath *path = [self.chatTableView indexPathForRowAtPoint:[gesture locationInView:self.chatTableView]];
+    if (!path) return;
+    CGMessage *message = [self messageForDisplayRow:path.row];
+    if (!message) return;
+    UIAlertController *sheet = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    if (message.content.length) {
+        [sheet addAction:[UIAlertAction actionWithTitle:@"Copy" style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *a) { [UIPasteboard generalPasteboard].string = message.content; }]];
+    }
+    if ([message.role isEqualToString:@"assistant"]) {
+        [sheet addAction:[UIAlertAction actionWithTitle:@"Regenerate" style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *a) {
+            NSUInteger idx = [self.messages indexOfObjectIdenticalTo:message];
+            if (idx != NSNotFound) {
+                [self.messages removeObjectsInRange:NSMakeRange(idx, self.messages.count - idx)];
+                [self.chatTableView reloadData];
+                [CGAPICommunicator createChatCompletionwithContent:self.messages];
+                [self slideDownTypeView];
+            }
+        }]];
+    } else if ([message.role isEqualToString:@"user"] && message.content.length) {
+        [sheet addAction:[UIAlertAction actionWithTitle:@"Edit & resend" style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *a) {
+            NSUInteger idx = [self.messages indexOfObjectIdenticalTo:message];
+            self.inputField.text = message.content;
+            self.inputFieldPlaceholder.hidden = YES;
+            if (idx != NSNotFound && idx + 1 < self.messages.count) [self.messages removeObjectsInRange:NSMakeRange(idx, self.messages.count - idx)];
+            else if (idx != NSNotFound) [self.messages removeObjectAtIndex:idx];
+            [self.chatTableView reloadData];
+            [self.inputField becomeFirstResponder];
+        }]];
+    }
+    [sheet addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+    if (sheet.popoverPresentationController) {
+        UITableViewCell *cell = [self.chatTableView cellForRowAtIndexPath:path];
+        sheet.popoverPresentationController.sourceView = cell ?: self.view;
+        sheet.popoverPresentationController.sourceRect = cell ? cell.bounds : self.view.bounds;
+    }
+    [self presentViewController:sheet animated:YES completion:nil];
+}
 
 #pragma mark tableview
 

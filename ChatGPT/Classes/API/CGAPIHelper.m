@@ -10,6 +10,14 @@
 
 @implementation CGAPIHelper
 
++ (NSString *)conversationDirectory {
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+    NSString *base = paths.firstObject ?: NSTemporaryDirectory();
+    NSString *dir = [base stringByAppendingPathComponent:@"Conversations"];
+    [[NSFileManager defaultManager] createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
+    return dir;
+}
+
 + (void)checkForAppUpdate {
     //this is just via the "XML Update Server"
     //disable this if you'd like (check the header)
@@ -90,60 +98,36 @@
 }
 
 + (void)logInUserwithKey:(NSString*)key {
+    if (key.length == 0) {
+        [NSNotificationCenter.defaultCenter postNotificationName:@"LOG-IN FAILURE" object:nil];
+        return;
+    }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSURL *randomEndpoint = [NSURL URLWithString:[NSString stringWithFormat:@"%@/v1/me", domain]];
-        NSURLResponse *response;
-        NSError *error;
-        
-        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-        [request setURL:randomEndpoint];
-        [request setHTTPMethod:@"GET"];
-        [request setHTTPBody:nil];
-        [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+        NSURL *endpoint = [NSURL URLWithString:[NSString stringWithFormat:@"%@/v1/models", domain]];
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:endpoint];
+        request.HTTPMethod = @"GET";
         [request setValue:[NSString stringWithFormat:@"Bearer %@", key] forHTTPHeaderField:@"Authorization"];
-        NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-        
-        if(data) {
-            NSDictionary* parsedResponse = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-            NSDictionary *errorDict = [parsedResponse objectForKey:@"error"];
-            if(errorDict) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [CGAPIHelper alert:@"Warning" withMessage:[NSString stringWithFormat:@"%@", [errorDict objectForKey:@"message"]]];
-                    [NSNotificationCenter.defaultCenter postNotificationName:@"LOG-IN FAILURE" object:nil];
-                });
-                
-                return;
+        dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+        __block NSInteger status = 0; __block NSError *requestError = nil; __block NSData *responseData = nil;
+        NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+            responseData = data; requestError = error; status = [(NSHTTPURLResponse *)response statusCode]; dispatch_semaphore_signal(sem);
+        }];
+        [task resume]; dispatch_semaphore_wait(sem, dispatch_time(DISPATCH_TIME_NOW, 30 * NSEC_PER_SEC));
+        if (requestError || status < 200 || status >= 300) {
+            NSString *message = requestError.localizedDescription ?: @"The API key was rejected.";
+            if (responseData.length) {
+                NSDictionary *j = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:nil];
+                NSString *server = [j[@"error"] isKindOfClass:[NSDictionary class]] ? j[@"error"][@"message"] : nil;
+                if ([server isKindOfClass:[NSString class]]) message = server;
             }
-            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasLoggedInUser"];
-            
-            [[NSUserDefaults standardUserDefaults] setObject:parsedResponse[@"email"] forKey:@"email"];
-            [[NSUserDefaults standardUserDefaults] setObject:parsedResponse[@"name"] forKey:@"username"];
-            [[NSUserDefaults standardUserDefaults] synchronize];
-            
-            id pictureValue = parsedResponse[@"picture"];
-            if (pictureValue && pictureValue != [NSNull null]) {
-                NSURL *imageURL = [NSURL URLWithString:pictureValue];
-                if (imageURL) {
-                    NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
-                    if (imageData) {
-                        NSString *tmpDirectory = NSTemporaryDirectory();
-                        NSString *filePath = [tmpDirectory stringByAppendingPathComponent:@"avatar.png"];
-                        BOOL success = [imageData writeToFile:filePath options:NSDataWritingAtomic error:&error];
-                        if (!success) {
-                            [self alert:@"Error" withMessage:@"An error occured when trying to download the user avatar."];
-                        }
-                    }
-                }
-            }
-
-            
-            [[NSUserDefaults standardUserDefaults] setObject:key forKey:@"apiKey"];
-            [NSNotificationCenter.defaultCenter postNotificationName:@"LOG-IN VALID" object:nil];
-        } else if(!data) {
-            [NSNotificationCenter.defaultCenter postNotificationName:@"LOG-IN FAILURE" object:nil];
+            dispatch_async(dispatch_get_main_queue(), ^{ [self alert:@"Login failed" withMessage:message]; [NSNotificationCenter.defaultCenter postNotificationName:@"LOG-IN FAILURE" object:nil]; });
             return;
         }
-            
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasLoggedInUser"];
+        [[NSUserDefaults standardUserDefaults] setObject:@"You" forKey:@"username"];
+        [[NSUserDefaults standardUserDefaults] setObject:key forKey:@"apiKey"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        dispatch_async(dispatch_get_main_queue(), ^{ [NSNotificationCenter.defaultCenter postNotificationName:@"LOG-IN VALID" object:nil]; });
     });
 }
 
@@ -182,7 +166,7 @@
     
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:conversationDict options:NSJSONWritingPrettyPrinted error:nil];
 
-    NSURL *fileURL = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.json", uuid]]];
+    NSURL *fileURL = [NSURL fileURLWithPath:[[self conversationDirectory] stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.json", uuid]]];
     // Write data using writeToURL]
     BOOL success = [jsonData writeToURL:fileURL options:NSDataWritingAtomic error:nil];
     if (success)
@@ -192,14 +176,16 @@
 + (NSMutableArray*)loadConversations {
     NSMutableArray *conversations = [NSMutableArray array];
     
-    NSString *directoryPath = NSTemporaryDirectory();
+    NSString *directoryPath = [self conversationDirectory];
     NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directoryPath error:nil];
     
     for (NSString *fileName in files) {
         if (![fileName hasSuffix:@".json"]) continue;
         NSString *filePath = [directoryPath stringByAppendingPathComponent:fileName];
         NSData *data = [NSData dataWithContentsOfFile:filePath];
-        NSDictionary *conversationDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        id decoded = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil] : nil;
+        if (![decoded isKindOfClass:[NSDictionary class]]) continue;
+        NSDictionary *conversationDict = decoded;
         
         CGConversation *conversation = CGConversation.new;
         conversation.uuid = conversationDict[@"conversationID"];
@@ -207,14 +193,15 @@
         conversation.creationDate = conversationDict[@"createdAt"];
         conversation.messages = [NSMutableArray array];
         
-        NSArray *messagesArray = conversationDict[@"messages"];
+        NSArray *messagesArray = [conversationDict[@"messages"] isKindOfClass:[NSArray class]] ? conversationDict[@"messages"] : @[];
         conversation.messageCount = (int)messagesArray.count;
         
         for (NSDictionary *messageDict in messagesArray) {
+            if (![messageDict isKindOfClass:[NSDictionary class]]) continue;
             CGMessage *message = CGMessage.new;
             message.role = messageDict[@"role"];
             message.type = [messageDict[@"type"] intValue];
-            message.content = messageDict[@"message"];
+            message.content = [messageDict[@"message"] isKindOfClass:[NSString class]] ? messageDict[@"message"] : @"";
             
             float contentWidth = UIScreen.mainScreen.bounds.size.width - 63;
             CGSize textSize = [message.content sizeWithFont:[UIFont systemFontOfSize:15]
@@ -258,7 +245,7 @@
 }
 
 + (BOOL)deleteConversationWithUUID:(NSString *)uuid {
-    NSString *filePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.json", uuid]];
+    NSString *filePath = [[self conversationDirectory] stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.json", uuid]];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
     if ([fileManager fileExistsAtPath:filePath]) {
@@ -277,7 +264,7 @@
 }
 
 + (BOOL)deleteAllConversations {
-    NSString *tempDirectory = NSTemporaryDirectory();
+    NSString *tempDirectory = [self conversationDirectory];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSError *error;
     
@@ -300,41 +287,39 @@
     }
     return allDeleted;
 }
-+ (CGMessage*)convertTextCompletionResponse:(NSDictionary*)jsonMessage {
-    NSDictionary *firstChoice = jsonMessage[@"choices"][0];
-    NSDictionary *messageDict = firstChoice[@"message"];
-    
-    CGMessage *newAssistantResponseMessage = CGMessage.new;
-    
-    newAssistantResponseMessage.author = @"ChatGPT";
-    newAssistantResponseMessage.content = [messageDict objectForKey:@"content"];
-    newAssistantResponseMessage.role = [messageDict objectForKey:@"role"];
-    if(VERSION_MIN(@"7.0")) {
-        newAssistantResponseMessage.avatar = [UIImage imageNamed:@"iOS7AssistantAvatar"];
-    } else {
-        newAssistantResponseMessage.avatar = [UIImage imageNamed:@"defaultAssistantAvatar"];
-    }
-    newAssistantResponseMessage.type = 2; //AI Message is 2, user 1, errors 3
-    newAssistantResponseMessage.indestructible = YES;
-    
++ (CGMessage*)assistantMessageWithText:(NSString*)text {
+    if (![text isKindOfClass:[NSString class]]) text = @"";
+    CGMessage *message = CGMessage.new;
+    message.author = @"ChatGPT"; message.content = text; message.role = @"assistant"; message.type = 2; message.indestructible = YES;
+    message.avatar = [UIImage imageNamed:(VERSION_MIN(@"7.0") ? @"iOS7AssistantAvatar" : @"defaultAssistantAvatar")];
     float contentWidth = UIScreen.mainScreen.bounds.size.width - 63;
-    CGSize textSize = [newAssistantResponseMessage.content sizeWithFont:[UIFont systemFontOfSize:15] constrainedToSize:CGSizeMake(contentWidth, MAXFLOAT) lineBreakMode:NSLineBreakByWordWrapping];
-    newAssistantResponseMessage.contentHeight = textSize.height + 50;
+    CGSize textSize = [text sizeWithFont:[UIFont systemFontOfSize:15] constrainedToSize:CGSizeMake(contentWidth, MAXFLOAT) lineBreakMode:NSLineBreakByWordWrapping];
+    message.contentHeight = textSize.height + 50;
+    return message;
+}
 
-    return newAssistantResponseMessage;
++ (CGMessage*)convertTextCompletionResponse:(NSDictionary*)jsonMessage {
+    id choices = jsonMessage[@"choices"];
+    if (![choices isKindOfClass:[NSArray class]] || [choices count] == 0) return [self loopErrorBack:@"The API returned an unexpected response."];
+    id first = [choices firstObject];
+    id dict = [first isKindOfClass:[NSDictionary class]] ? first[@"message"] : nil;
+    NSString *text = [dict isKindOfClass:[NSDictionary class]] && [dict[@"content"] isKindOfClass:[NSString class]] ? dict[@"content"] : @"";
+    return [self assistantMessageWithText:text];
 }
 
 + (CGMessage*)convertImageGenerationResponse:(NSDictionary*)jsonMessage {
-    NSDictionary *firstData = jsonMessage[@"data"][0];
+    NSArray *dataArray = [jsonMessage[@"data"] isKindOfClass:[NSArray class]] ? jsonMessage[@"data"] : nil;
+    if (dataArray.count == 0 || ![dataArray.firstObject isKindOfClass:[NSDictionary class]]) return nil;
+    NSDictionary *firstData = dataArray.firstObject;
     
     
     CGMessage *newAssistantResponseMessage = CGMessage.new;
     
     newAssistantResponseMessage.author = @"ChatGPT";
-    newAssistantResponseMessage.content = firstData[@"revised_prompt"];
-    newAssistantResponseMessage.imageHash = firstData[@"b64_json"];
-    
-    NSData *imageData = [NSData dataWithBase64EncodedString:firstData[@"b64_json"]];
+    newAssistantResponseMessage.content = [firstData[@"revised_prompt"] isKindOfClass:[NSString class]] ? firstData[@"revised_prompt"] : @"Generated image";
+    newAssistantResponseMessage.imageHash = [firstData[@"b64_json"] isKindOfClass:[NSString class]] ? firstData[@"b64_json"] : nil;
+    if (!newAssistantResponseMessage.imageHash.length) return nil;
+    NSData *imageData = [NSData dataWithBase64EncodedString:newAssistantResponseMessage.imageHash];
     newAssistantResponseMessage.imageAttachment = [UIImage imageWithData:imageData];
     
     newAssistantResponseMessage.role = @"assistant";

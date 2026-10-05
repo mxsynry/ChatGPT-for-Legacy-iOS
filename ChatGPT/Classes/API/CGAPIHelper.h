@@ -17,7 +17,7 @@
 #define apiKey [[NSUserDefaults standardUserDefaults] objectForKey:@"apiKey"]
 
 //User settable params
-#define updateChecks YES
+#define updateChecks NO
 
 #define UDCheckServer @"http://5.230.249.85:7530"
 #define appVersion [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]
@@ -33,6 +33,7 @@
 @property NSDictionary *currentAccount;
 
 + (CGMessage*)convertTextCompletionResponse:(NSDictionary*)jsonMessage;
++ (CGMessage*)assistantMessageWithText:(NSString*)text;
 + (CGMessage*)convertImageGenerationResponse:(NSDictionary*)jsonMessage;
 + (CGMessage*)loopErrorBack:(NSString*)errorMessage;
 

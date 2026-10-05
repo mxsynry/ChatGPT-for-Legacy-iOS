@@ -15,8 +15,10 @@
 #import "CGChatViewController.h"
 #import "CGConversationElementCell.h"
 
-@interface CGSidebarController : UITableViewController
+@interface CGSidebarController : UITableViewController <UISearchResultsUpdating>
 
 @property NSIndexPath *selectedIndexPath;
 @property NSMutableArray *allConversations;
+@property NSMutableArray *filteredConversations;
+@property UISearchController *conversationSearchController;
 @end

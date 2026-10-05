@@ -18,6 +18,13 @@
     [super viewDidLoad];
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(recheckandReload:) name:@"RE-CHECK CONVOS" object:nil];
     self.allConversations = [CGAPIHelper loadConversations];
+    self.filteredConversations = [self.allConversations mutableCopy];
+    self.conversationSearchController = [[UISearchController alloc] initWithSearchResultsController:nil];
+    self.conversationSearchController.searchResultsUpdater = self;
+    self.conversationSearchController.obscuresBackgroundDuringPresentation = NO;
+    self.conversationSearchController.searchBar.placeholder = @"Search chats";
+    self.navigationItem.searchController = self.conversationSearchController;
+    self.definesPresentationContext = YES;
     
     if(VERSION_MIN(@"7.0")) {
         if ([self respondsToSelector:@selector(topLayoutGuide)]) {
@@ -31,6 +38,27 @@
 - (void)recheckandReload:(NSNotification *)notification {
     self.allConversations = nil;
     self.allConversations = [CGAPIHelper loadConversations];
+    [self updateSearchResultsForSearchController:self.conversationSearchController];
+    [self.tableView reloadData];
+}
+
+
+- (NSArray *)displayedConversations {
+    NSString *q = self.conversationSearchController.searchBar.text;
+    return q.length ? self.filteredConversations : self.allConversations;
+}
+
+- (void)updateSearchResultsForSearchController:(UISearchController *)searchController {
+    NSString *q = [searchController.searchBar.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if (!q.length) self.filteredConversations = [self.allConversations mutableCopy];
+    else {
+        NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(CGConversation *c, NSDictionary *bindings) {
+            if ([c.title rangeOfString:q options:NSCaseInsensitiveSearch].location != NSNotFound) return YES;
+            for (CGMessage *m in c.messages) if ([m.content rangeOfString:q options:NSCaseInsensitiveSearch].location != NSNotFound) return YES;
+            return NO;
+        }];
+        self.filteredConversations = [[self.allConversations filteredArrayUsingPredicate:predicate] mutableCopy];
+    }
     [self.tableView reloadData];
 }
 
@@ -83,7 +111,7 @@
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     if(alertView.tag == 1) {
         if (buttonIndex == 1) {  // "Option 1"
-            CGConversation *currentConv = self.allConversations[self.selectedIndexPath.row];
+            CGConversation *currentConv = [[self displayedConversations] objectAtIndex:self.selectedIndexPath.row];
             UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Rename Conversation" message:@"Once you're done, press the 'Done' button." delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Done", nil];
             //input field
             alertView.alertViewStyle = UIAlertViewStylePlainTextInput;
@@ -96,7 +124,7 @@
         } else if (buttonIndex == 2) {  // "Option 2"
             [alertView dismissWithClickedButtonIndex:buttonIndex animated:YES];
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                CGConversation *currentConv = self.allConversations[self.selectedIndexPath.row];
+                CGConversation *currentConv = [[self displayedConversations] objectAtIndex:self.selectedIndexPath.row];
                 NSMutableArray *dict = currentConv.messages;
                 NSMutableArray *messages = [[NSMutableArray alloc] init];
                 for (CGMessage *message in dict) {
@@ -110,7 +138,7 @@
                 });
             });
         } else if (buttonIndex == 3) {  // "Delete"
-            CGConversation *selectedConv = self.allConversations[self.selectedIndexPath.row];
+            CGConversation *selectedConv = [[self displayedConversations] objectAtIndex:self.selectedIndexPath.row];
             BOOL success = [CGAPIHelper deleteConversationWithUUID:selectedConv.uuid];
             if (success) {
                 self.selectedIndexPath = nil;
@@ -122,7 +150,7 @@
     } else if(alertView.tag == 2) {
         if (buttonIndex == alertView.firstOtherButtonIndex) {
             NSString *enteredText = [alertView textFieldAtIndex:0].text;
-            CGConversation *selectedConv = self.allConversations[self.selectedIndexPath.row];
+            CGConversation *selectedConv = [[self displayedConversations] objectAtIndex:self.selectedIndexPath.row];
             UINavigationController *navigationController = (UINavigationController *)self.slideMenuController.contentViewController;
             CGChatViewController *contentViewController = navigationController.viewControllers.firstObject;
             [contentViewController setTitle:enteredText];
@@ -197,9 +225,9 @@
     if (section == 0) {
         return 1;
     } else if (section == 1) {
-        if (self.allConversations.count == 0)
-            return 1;
-        return self.allConversations.count;
+        NSArray *shown = [self displayedConversations];
+        if (shown.count == 0) return 1;
+        return shown.count;
     }
     
     return 0;
@@ -211,7 +239,8 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.section == 1) {
-        if (self.allConversations.count == 0) {
+        NSArray *shown = [self displayedConversations];
+        if (shown.count == 0) {
             // Display "Nothing" Cell when no conversations exist
             CGConversationElementCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Nothing"];
             if (cell == nil) {
@@ -227,9 +256,9 @@
                 [cell.iOS7Separator setHidden:YES]; // hide it only here
             }
             return cell;
-        } else if(self.allConversations.count > 0) {
+        } else if(shown.count > 0) {
             // Display conversations in "ConvoCell"
-            CGConversation *conversation = self.allConversations[indexPath.row];
+            CGConversation *conversation = shown[indexPath.row];
             CGConversationElementCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ConvoCell"];
             if (cell == nil) {
                 cell = [[CGConversationElementCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ConvoCell"];
