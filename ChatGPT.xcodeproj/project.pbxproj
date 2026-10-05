@@ -62,7 +62,6 @@
 		49A1BBE82D351874002D9D00 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49A1BBCA2D351874002D9D00 /* UIKit.framework */; };
 		49A1BBF02D351874002D9D00 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 49A1BBEE2D351874002D9D00 /* InfoPlist.strings */; };
 		49A1BBF22D351874002D9D00 /* ChatGPTTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 49A1BBF12D351874002D9D00 /* ChatGPTTests.m */; };
-		49A1BC0A2D3519DD002D9D00 /* ChatGPT-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49A1BC072D3519DD002D9D00 /* ChatGPT-Info.plist */; };
 		49A1BC0E2D3519E4002D9D00 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 49A1BC0D2D3519E4002D9D00 /* Images.xcassets */; };
 		49A1BC142D3519E8002D9D00 /* CGAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 49A1BC122D3519E8002D9D00 /* CGAppDelegate.m */; };
 		49A1BC152D3519E8002D9D00 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 49A1BC132D3519E8002D9D00 /* main.m */; };
@@ -84,11 +83,6 @@
 		5B203AD92D3C4ABA004EEA20 /* BarButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B203AD52D3C4ABA004EEA20 /* BarButton@2x.png */; };
 		5B203ADA2D3C4ABA004EEA20 /* BarButtonPressed.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B203AD62D3C4ABA004EEA20 /* BarButtonPressed.png */; };
 		5B203ADB2D3C4ABA004EEA20 /* BarButtonPressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B203AD72D3C4ABA004EEA20 /* BarButtonPressed@2x.png */; };
-		5B25FC0E2DB2425400876480 /* NSURLConnection+FoundationCompletions.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B25FBFE2DB2425400876480 /* NSURLConnection+FoundationCompletions.m */; };
-		5B25FC0F2DB2425400876480 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B25FC0A2DB2425400876480 /* libcrypto.a */; };
-		5B25FC102DB2425400876480 /* libcurl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B25FC0B2DB2425400876480 /* libcurl.a */; };
-		5B25FC112DB2425400876480 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B25FC0C2DB2425400876480 /* libssl.a */; };
-		5B25FC122DB2425400876480 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B25FC0D2DB2425400876480 /* libz.a */; };
 		5B2E21CB2D354DEC0085E7BB /* TRMalleableFrameView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B2E21CA2D354DEC0085E7BB /* TRMalleableFrameView.m */; };
 		5B6296652D711517001D3C63 /* CGWelcomeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B6296642D711517001D3C63 /* CGWelcomeController.m */; };
 		5B6BAE2D2D69DDAE00B5E63B /* loadingToast.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B6BAE2C2D69DDAE00B5E63B /* loadingToast.png */; };
@@ -230,7 +224,6 @@
 		5B203AD62D3C4ABA004EEA20 /* BarButtonPressed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BarButtonPressed.png; sourceTree = "<group>"; };
 		5B203AD72D3C4ABA004EEA20 /* BarButtonPressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "BarButtonPressed@2x.png"; sourceTree = "<group>"; };
 		5B25FBFD2DB2425400876480 /* NSURLConnection+FoundationCompletions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLConnection+FoundationCompletions.h"; sourceTree = "<group>"; };
-		5B25FBFE2DB2425400876480 /* NSURLConnection+FoundationCompletions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLConnection+FoundationCompletions.m"; sourceTree = "<group>"; };
 		5B25FC012DB2425400876480 /* curl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = curl.h; sourceTree = "<group>"; };
 		5B25FC022DB2425400876480 /* curlver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = curlver.h; sourceTree = "<group>"; };
 		5B25FC032DB2425400876480 /* easy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = easy.h; sourceTree = "<group>"; };
@@ -240,10 +233,6 @@
 		5B25FC072DB2425400876480 /* system.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = system.h; sourceTree = "<group>"; };
 		5B25FC082DB2425400876480 /* typecheck-gcc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "typecheck-gcc.h"; sourceTree = "<group>"; };
 		5B25FC092DB2425400876480 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
-		5B25FC0A2DB2425400876480 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcrypto.a; sourceTree = "<group>"; };
-		5B25FC0B2DB2425400876480 /* libcurl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcurl.a; sourceTree = "<group>"; };
-		5B25FC0C2DB2425400876480 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libssl.a; sourceTree = "<group>"; };
-		5B25FC0D2DB2425400876480 /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libz.a; sourceTree = "<group>"; };
 		5B2E21C92D354DEC0085E7BB /* TRMalleableFrameView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TRMalleableFrameView.h; sourceTree = "<group>"; };
 		5B2E21CA2D354DEC0085E7BB /* TRMalleableFrameView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TRMalleableFrameView.m; sourceTree = "<group>"; };
 		5B6296632D711517001D3C63 /* CGWelcomeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CGWelcomeController.h; sourceTree = "<group>"; };
@@ -296,12 +285,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5B25FC102DB2425400876480 /* libcurl.a in Frameworks */,
 				49A1BBC92D351874002D9D00 /* CoreGraphics.framework in Frameworks */,
-				5B25FC112DB2425400876480 /* libssl.a in Frameworks */,
 				49A1BBCB2D351874002D9D00 /* UIKit.framework in Frameworks */,
-				5B25FC0F2DB2425400876480 /* libcrypto.a in Frameworks */,
-				5B25FC122DB2425400876480 /* libz.a in Frameworks */,
 				49A1BBC72D351874002D9D00 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -591,7 +576,6 @@
 			isa = PBXGroup;
 			children = (
 				5B25FBFD2DB2425400876480 /* NSURLConnection+FoundationCompletions.h */,
-				5B25FBFE2DB2425400876480 /* NSURLConnection+FoundationCompletions.m */,
 			);
 			path = "NSURLConnection-Curl";
 			sourceTree = "<group>";
@@ -600,10 +584,6 @@
 			isa = PBXGroup;
 			children = (
 				5B25FC002DB2425400876480 /* curl */,
-				5B25FC0A2DB2425400876480 /* libcrypto.a */,
-				5B25FC0B2DB2425400876480 /* libcurl.a */,
-				5B25FC0C2DB2425400876480 /* libssl.a */,
-				5B25FC0D2DB2425400876480 /* libz.a */,
 			);
 			path = SSL;
 			sourceTree = "<group>";
@@ -861,7 +841,6 @@
 				5B203AD22D3C4A81004EEA20 /* bar-BG.png in Resources */,
 				5B203AD02D3C4A79004EEA20 /* bar-BG@2x.png in Resources */,
 				5BB7D95E2D731A8500C7C5AD /* searchbar-BG.png in Resources */,
-				49A1BC0A2D3519DD002D9D00 /* ChatGPT-Info.plist in Resources */,
 				0A3722082D89777100EA788B /* CGImageAttachment.xib in Resources */,
 				0AF6A7352D8CB5D50060F3F8 /* attachmentCellMask@2x.png in Resources */,
 				0AB69E082DA14A1A00FC1619 /* iOS7Separator@2x.png in Resources */,
@@ -965,7 +944,6 @@
 				5B7FCE3D2D6B077100DF4899 /* APLSlideMenuViewController.m in Sources */,
 				5B6296652D711517001D3C63 /* CGWelcomeController.m in Sources */,
 				0AF6A7392D8CBF070060F3F8 /* CGAImageAttachment.m in Sources */,
-				5B25FC0E2DB2425400876480 /* NSURLConnection+FoundationCompletions.m in Sources */,
 				5B0D4FE52D50019D0042D50A /* Base64.m in Sources */,
 				49A1BC272D352569002D9D00 /* CGAPICommunicator.m in Sources */,
 				5B7FCE452D6B6C0600DF4899 /* CGConversationElementCell.m in Sources */,
@@ -1031,6 +1009,7 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_BITCODE = NO;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
@@ -1055,11 +1034,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = iphoneos;
-				VALID_ARCHS = "armv7 armv7s";
-			};
+};
 			name = Debug;
 		};
 		49A1BBF42D351874002D9D00 /* Release */ = {
@@ -1070,6 +1048,7 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_BITCODE = NO;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
@@ -1089,12 +1068,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
-				VALID_ARCHS = "armv7 armv7s";
-			};
+};
 			name = Release;
 		};
 		49A1BBF62D351874002D9D00 /* Debug */ = {
@@ -1105,19 +1083,17 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ChatGPT/SupportingFiles/ChatGPT-Prefix.pch";
 				INFOPLIST_FILE = "ChatGPT/SupportingFiles/ChatGPT-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/ChatGPT/Libraries/SSL",
-					/Users/virtuellady/Downloads/WOW,
-				);
+);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos7.1;
+				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+ARCHS = arm64;
 				TARGETED_DEVICE_FAMILY = 1;
-				VALID_ARCHS = "armv7 armv7s";
-				WRAPPER_EXTENSION = app;
+WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
 		};
@@ -1129,19 +1105,17 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ChatGPT/SupportingFiles/ChatGPT-Prefix.pch";
 				INFOPLIST_FILE = "ChatGPT/SupportingFiles/ChatGPT-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/ChatGPT/Libraries/SSL",
-					/Users/virtuellady/Downloads/WOW,
-				);
+);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos7.1;
+				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+ARCHS = arm64;
 				TARGETED_DEVICE_FAMILY = 1;
-				VALID_ARCHS = "armv7 armv7s";
-				WRAPPER_EXTENSION = app;
+WRAPPER_EXTENSION = app;
 			};
 			name = Release;
 		};
@@ -1163,8 +1137,7 @@
 				INFOPLIST_FILE = "ChatGPTTests/ChatGPTTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUNDLE_LOADER)";
-				VALID_ARCHS = "armv7 armv7s";
-				WRAPPER_EXTENSION = xctest;
+WRAPPER_EXTENSION = xctest;
 			};
 			name = Debug;
 		};
@@ -1182,8 +1155,7 @@
 				INFOPLIST_FILE = "ChatGPTTests/ChatGPTTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUNDLE_LOADER)";
-				VALID_ARCHS = "armv7 armv7s";
-				WRAPPER_EXTENSION = xctest;
+WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;
 		};
