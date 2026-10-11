@@ -1,0 +1,15 @@
+{
+  "swift_frontend_parse": "passed",
+  "xcode_build": "not_run",
+  "device_test": "not_run",
+  "official_binary_decompilation": "not_performed",
+  "new_source_files": [
+    "App/MessageRowView.swift"
+  ],
+  "fixes": [
+    "message row extraction",
+    "multiline edit sheet",
+    "draft restore save guard",
+    "edit conversation ID binding"
+  ]
+}

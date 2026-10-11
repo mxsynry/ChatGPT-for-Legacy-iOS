@@ -1,0 +1,45 @@
+[
+  {
+    "file": "ChatGPT-1.2024.348.ipa",
+    "version": "1.2024.348",
+    "minimum_ios": "10.0",
+    "bundle_id": "com.openai.chat",
+    "frameworks": [
+      "Assets.framework",
+      "ChatGPT.framework",
+      "KrispNoiseFilter.framework",
+      "LiveKitWebRTC.framework",
+      "PlatformAgnosticAssetTypes.framework",
+      "Sentry.framework"
+    ],
+    "extensions": [
+      "ShareExtension.appex",
+      "VoiceScreenSharing.appex",
+      "Widgets.appex"
+    ]
+  },
+  {
+    "file": "com.openai.chat_1.2026.266_und3fined.ipa",
+    "version": "1.2026.266",
+    "minimum_ios": "18.0",
+    "bundle_id": "com.openai.chat",
+    "frameworks": [
+      "ChatGPT.framework",
+      "ChatGPTFinanceExperianImplementation.framework",
+      "ExperianIDVerifySDK.framework",
+      "LinkKit.framework",
+      "LiveKitWebRTC.framework",
+      "Lottie.framework",
+      "OpenAIXPlat.framework"
+    ],
+    "extensions": [
+      "AskChatGPTActionExtension.appex",
+      "ChatGPTSearchSafariExtension.appex",
+      "MessagesExtension.appex",
+      "NotificationServiceExtension.appex",
+      "ShareExtension.appex",
+      "VoiceScreenSharing.appex",
+      "Widgets.appex"
+    ]
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "stage": 17,
+  "direct_official_binary_comparison": "Forensics/STAGE17-OFFICIAL-BINARY-EVIDENCE.json",
+  "test_command": "bash Scripts/preflight.sh",
+  "portable_swift_regression_assertions": 120,
+  "source_wiring_assertions": 32,
+  "swift_parse": "passed",
+  "xcode_compile": "not available in this Linux environment",
+  "ios16_device_test": "not performed",
+  "chatgpt_work_runtime": "not implemented; local Work-style only",
+  "official_quota_in_native_ui": "not available on third-party OAuth; official usage via in-app Safari",
+  "status": "source-stage package, not installable IPA"
+}

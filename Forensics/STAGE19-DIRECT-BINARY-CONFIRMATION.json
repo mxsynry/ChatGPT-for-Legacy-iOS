@@ -1,0 +1,48 @@
+{
+  "2024": {
+    "framework_bytes": 41854272,
+    "identifiers": {
+      "ConversationDraftLifecycleTracker": false,
+      "MessageRowContextMenuPart": true,
+      "ConversationBranchingService": false,
+      "branchConversation(conversationID:messageID:": false,
+      "MessageSourcesView": true,
+      "ChatGPTLockedChats": false,
+      "LockedChatsBiometricCredentialStore": false,
+      "ComposerModelPickerUIKitMenuBuilder": false,
+      "SendLongPressModelSelector": false,
+      "UsageLimitsDashboardViewModel": false,
+      "MessageEditingAttachmentRestorer": false,
+      "OAuth": true,
+      "ChatGPTVoice": true,
+      "ChatGPTMemory": true,
+      "ChatGPTLogin": true,
+      "MessageRowBranchContextLabel": false,
+      "SSEFrameCollector": false,
+      "ChatGPTWritingBlocks": false
+    }
+  },
+  "2026": {
+    "framework_bytes": 174277744,
+    "identifiers": {
+      "ConversationDraftLifecycleTracker": true,
+      "MessageRowContextMenuPart": true,
+      "ConversationBranchingService": true,
+      "branchConversation(conversationID:messageID:": true,
+      "MessageSourcesView": true,
+      "ChatGPTLockedChats": true,
+      "LockedChatsBiometricCredentialStore": true,
+      "ComposerModelPickerUIKitMenuBuilder": true,
+      "SendLongPressModelSelector": true,
+      "UsageLimitsDashboardViewModel": true,
+      "MessageEditingAttachmentRestorer": true,
+      "OAuth": true,
+      "ChatGPTVoice": true,
+      "ChatGPTMemory": true,
+      "ChatGPTLogin": true,
+      "MessageRowBranchContextLabel": true,
+      "SSEFrameCollector": false,
+      "ChatGPTWritingBlocks": true
+    }
+  }
+}

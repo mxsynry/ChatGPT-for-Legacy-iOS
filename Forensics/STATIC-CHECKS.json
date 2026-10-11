@@ -1,0 +1,37 @@
+[
+  {
+    "file": "AppLock.swift",
+    "swiftSyntaxParse": "PASS",
+    "stderr": ""
+  },
+  {
+    "file": "AttachmentInput.swift",
+    "swiftSyntaxParse": "PASS",
+    "stderr": ""
+  },
+  {
+    "file": "ChatGPTReconstructedApp.swift",
+    "swiftSyntaxParse": "PASS",
+    "stderr": ""
+  },
+  {
+    "file": "ConversationStore.swift",
+    "swiftSyntaxParse": "PASS",
+    "stderr": ""
+  },
+  {
+    "file": "CredentialVault.swift",
+    "swiftSyntaxParse": "PASS",
+    "stderr": ""
+  },
+  {
+    "file": "OpenAIClient.swift",
+    "swiftSyntaxParse": "PASS",
+    "stderr": ""
+  },
+  {
+    "file": "RootView.swift",
+    "swiftSyntaxParse": "PASS",
+    "stderr": ""
+  }
+]

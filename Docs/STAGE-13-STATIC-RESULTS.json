@@ -1,0 +1,11 @@
+{
+  "stage": 13,
+  "swift_parse": "passed",
+  "swift_source_files": 14,
+  "portable_regressions": "PASS: 32 source regression checks",
+  "macOS_Xcode_build": "not run (no macOS Xcode SDK in environment)",
+  "TrollStore_installation": "not run",
+  "Google_passkey_OAuth": "not tested with a live account",
+  "cloud_history_live_sync": "not provided by documented third-party OAuth",
+  "official_binary_metadata_compared": true
+}

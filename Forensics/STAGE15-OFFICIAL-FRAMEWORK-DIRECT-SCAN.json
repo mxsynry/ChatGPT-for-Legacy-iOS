@@ -1,0 +1,135 @@
+{
+  "method": "byte substring presence in actual user-provided arm64 ChatGPT.framework executable; not a decompilation",
+  "binaries": {
+    "2024": {
+      "binary_size": 41854272,
+      "sha256": "830dae6b5e9135c1bf3e46e283f1060bb552a2b8351abf7b5f0cf49b25b196e4"
+    },
+    "2026": {
+      "binary_size": 174277744,
+      "sha256": "f897526e162fe3811283272951154834799ed18ff9d834cc000fa5315b5e71eb"
+    }
+  },
+  "features": {
+    "Message action sheet": [
+      {
+        "identifier": "CalpicoMessageActionsSheet",
+        "2024": false,
+        "2026": true
+      },
+      {
+        "identifier": "CalpicoMessageContextMenuInteraction",
+        "2024": false,
+        "2026": true
+      },
+      {
+        "identifier": "MessageRowContextMenuPart",
+        "2024": true,
+        "2026": true
+      }
+    ],
+    "Send model picker": [
+      {
+        "identifier": "SendLongPressModelSelector",
+        "2024": false,
+        "2026": true
+      },
+      {
+        "identifier": "MessageInputLongPressModelSelectorView",
+        "2024": false,
+        "2026": true
+      },
+      {
+        "identifier": "ComposerModelPickerUIKitMenuBuilder",
+        "2024": false,
+        "2026": true
+      }
+    ],
+    "Draft ownership": [
+      {
+        "identifier": "ConversationDraftLifecycleTracker",
+        "2024": false,
+        "2026": true
+      }
+    ],
+    "Clickable sources": [
+      {
+        "identifier": "ChatGPTMessageRow/MessageSourcesView.swift",
+        "2024": false,
+        "2026": true
+      },
+      {
+        "identifier": "MessageSourcesView",
+        "2024": true,
+        "2026": true
+      }
+    ],
+    "Assistant rendering": [
+      {
+        "identifier": "ChatGPTMessageRow/MessageAssistantContentStack.swift",
+        "2024": false,
+        "2026": true
+      },
+      {
+        "identifier": "OAIMarkdown",
+        "2024": true,
+        "2026": true
+      }
+    ],
+    "Biometric locked chats": [
+      {
+        "identifier": "ChatGPTLockedChats/LockedChatsBiometricCredentialStore.swift",
+        "2024": false,
+        "2026": true
+      },
+      {
+        "identifier": "ChatGPTLockedChats/LockedChatsPINFlowViewModel.swift",
+        "2024": false,
+        "2026": true
+      }
+    ],
+    "Passkey identity": [
+      {
+        "identifier": "NativeAuthPasskeyAuthenticator",
+        "2024": false,
+        "2026": true
+      },
+      {
+        "identifier": "NativeAuthUsernamelessPasskeyLoginCoordinator",
+        "2024": false,
+        "2026": true
+      }
+    ],
+    "Attachment restoration": [
+      {
+        "identifier": "ChatGPTMessageInput/MessageEditingAttachmentRestorer.swift",
+        "2024": false,
+        "2026": true
+      },
+      {
+        "identifier": "ChatGPTMessageInput/LibraryFileUploadRestorer.swift",
+        "2024": false,
+        "2026": true
+      }
+    ],
+    "Writing blocks": [
+      {
+        "identifier": "ChatGPTMessages/WritingBlockConversationComposerViewModel.swift",
+        "2024": false,
+        "2026": true
+      }
+    ],
+    "History": [
+      {
+        "identifier": "CalpicoConversationsRepository",
+        "2024": false,
+        "2026": true
+      },
+      {
+        "identifier": "ChatGPTHistory/HistoryViewModel.swift",
+        "2024": true,
+        "2026": true
+      }
+    ]
+  }
+}

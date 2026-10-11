@@ -1,0 +1,70 @@
+name: iOS 16 Reconstruction — Stabilization V22
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'App/**'
+      - 'project.yml'
+      - 'Tests/**'
+      - 'Scripts/**'
+      - '.github/workflows/ios-build.yml'
+jobs:
+  verify-and-build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain information
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+      - name: Portable regressions and syntax checks
+        shell: bash
+        run: |
+          set -o pipefail
+          bash Scripts/preflight.sh 2>&1 | tee "$GITHUB_WORKSPACE/preflight.log"
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate native Xcode project
+        run: xcodegen generate
+      - name: Verify generated Xcode scheme
+        run: xcodebuild -list -project ChatGPTReconstructed.xcodeproj
+      - name: Simulator SDK compile (no simulator runtime needed)
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild -project ChatGPTReconstructed.xcodeproj -scheme ChatGPTReconstructed \
+            -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/SimDerivedData" CODE_SIGNING_ALLOWED=NO build \
+            2>&1 | tee "$GITHUB_WORKSPACE/build-simulator.log"
+      - name: iOS device SDK compile
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild -project ChatGPTReconstructed.xcodeproj -scheme ChatGPTReconstructed \
+            -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" CODE_SIGNING_ALLOWED=NO build \
+            2>&1 | tee "$GITHUB_WORKSPACE/build-device.log"
+      - name: Package unsigned TrollStore candidate (not installed/tested)
+        shell: bash
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/Payload"
+          cp -R "$RUNNER_TEMP/DerivedData/Build/Products/Release-iphoneos/ChatGPTReconstructed.app" "$RUNNER_TEMP/Payload/"
+          cd "$RUNNER_TEMP"
+          zip -qr "$GITHUB_WORKSPACE/OpenChat16-V22-unsigned.ipa" Payload
+      - name: Upload compiled IPA candidate
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: OpenChat16-V22-unsigned
+          path: OpenChat16-V22-unsigned.ipa
+      - name: Upload build diagnostics even if compile fails
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: V22-build-logs
+          path: |
+            preflight.log
+            build-simulator.log
+            build-device.log
+          if-no-files-found: ignore

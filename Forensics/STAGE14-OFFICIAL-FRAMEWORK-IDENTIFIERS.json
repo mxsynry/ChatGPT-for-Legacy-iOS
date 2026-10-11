@@ -1,0 +1,118 @@
+{
+  "2024": {
+    "NativeAuthPasskey": {
+      "present": false,
+      "occurrences": 0
+    },
+    "NativeAuthUsernamelessPasskeyLoginCoordinator": {
+      "present": false,
+      "occurrences": 0
+    },
+    "LockedChatsBiometricCredentialStore": {
+      "present": false,
+      "occurrences": 0
+    },
+    "ChatGPTLogin": {
+      "present": true,
+      "occurrences": 11
+    },
+    "CalpicoConversationsRepository": {
+      "present": false,
+      "occurrences": 0
+    },
+    "FileCalpicoConversationsCache": {
+      "present": false,
+      "occurrences": 0
+    },
+    "ASWebAuthenticationSession": {
+      "present": true,
+      "occurrences": 23
+    },
+    "SFSafariViewController": {
+      "present": true,
+      "occurrences": 12
+    },
+    "LAContext": {
+      "present": true,
+      "occurrences": 5
+    },
+    "/backend-api": {
+      "present": true,
+      "occurrences": 1
+    },
+    "authorization_code": {
+      "present": true,
+      "occurrences": 1
+    },
+    "chatgpt.tokens.use.direct": {
+      "present": false,
+      "occurrences": 0
+    },
+    "HistoryViewModel": {
+      "present": true,
+      "occurrences": 13
+    },
+    "ChatGPTVoice": {
+      "present": true,
+      "occurrences": 123
+    }
+  },
+  "2026": {
+    "NativeAuthPasskey": {
+      "present": true,
+      "occurrences": 21
+    },
+    "NativeAuthUsernamelessPasskeyLoginCoordinator": {
+      "present": true,
+      "occurrences": 5
+    },
+    "LockedChatsBiometricCredentialStore": {
+      "present": true,
+      "occurrences": 5
+    },
+    "ChatGPTLogin": {
+      "present": true,
+      "occurrences": 59
+    },
+    "CalpicoConversationsRepository": {
+      "present": true,
+      "occurrences": 12
+    },
+    "FileCalpicoConversationsCache": {
+      "present": true,
+      "occurrences": 3
+    },
+    "ASWebAuthenticationSession": {
+      "present": true,
+      "occurrences": 22
+    },
+    "SFSafariViewController": {
+      "present": true,
+      "occurrences": 17
+    },
+    "LAContext": {
+      "present": true,
+      "occurrences": 4
+    },
+    "/backend-api": {
+      "present": true,
+      "occurrences": 5
+    },
+    "authorization_code": {
+      "present": true,
+      "occurrences": 1
+    },
+    "chatgpt.tokens.use.direct": {
+      "present": false,
+      "occurrences": 0
+    },
+    "HistoryViewModel": {
+      "present": true,
+      "occurrences": 14
+    },
+    "ChatGPTVoice": {
+      "present": true,
+      "occurrences": 325
+    }
+  }
+}

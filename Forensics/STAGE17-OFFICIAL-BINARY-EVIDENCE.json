@@ -1,0 +1,48 @@
+{
+  "2024": {
+    "ipa": "ChatGPT-1.2024.348.ipa",
+    "framework_macho_bytes": 41854272,
+    "literal_identifiers_present": {
+      "DefaultConversationBranchingService": false,
+      "ConversationBranchingService": false,
+      "branchConversation(conversationID:messageID:isContextTruncationContinuation:)": false,
+      "Branch into Work": false,
+      "MessageRowBranchContextLabel": false,
+      "ConversationMode": true,
+      "ConversationModelSelectionStore": false,
+      "SendLongPressModelSelector": false,
+      "UsageLimitsOverviewViewModel": false,
+      "UsageLimitsDashboardViewModel": false,
+      "UsageLimitsDashboardProgressBar": false,
+      "GetAccountRateLimitsParams": false,
+      "ClientRequestAccountRateLimitsReadRequest": false,
+      "account/rateLimits/read": false,
+      "Usage remaining. Five-hour limit:": false,
+      "Usage remaining. Weekly limit:": false,
+      "chatgpt-credits-usage-limits-remaining-percentage": false
+    }
+  },
+  "2026": {
+    "ipa": "com.openai.chat_1.2026.266_und3fined.ipa",
+    "framework_macho_bytes": 174277744,
+    "literal_identifiers_present": {
+      "DefaultConversationBranchingService": true,
+      "ConversationBranchingService": true,
+      "branchConversation(conversationID:messageID:isContextTruncationContinuation:)": true,
+      "Branch into Work": true,
+      "MessageRowBranchContextLabel": true,
+      "ConversationMode": true,
+      "ConversationModelSelectionStore": true,
+      "SendLongPressModelSelector": true,
+      "UsageLimitsOverviewViewModel": true,
+      "UsageLimitsDashboardViewModel": true,
+      "UsageLimitsDashboardProgressBar": true,
+      "GetAccountRateLimitsParams": true,
+      "ClientRequestAccountRateLimitsReadRequest": true,
+      "account/rateLimits/read": true,
+      "Usage remaining. Five-hour limit:": true,
+      "Usage remaining. Weekly limit:": true,
+      "chatgpt-credits-usage-limits-remaining-percentage": true
+    }
+  }
+}

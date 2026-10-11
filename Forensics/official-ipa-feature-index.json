@@ -1,0 +1,275 @@
+{
+  "2024": {
+    "release": "1.2024.348",
+    "bundleID": "com.openai.chat",
+    "minimumOS": "10.0",
+    "appExtensions": [
+      "ShareExtension.appex",
+      "VoiceScreenSharing.appex",
+      "Widgets.appex"
+    ],
+    "dylibFrameworks": [
+      "Assets.framework",
+      "ChatGPT.framework",
+      "KrispNoiseFilter.framework",
+      "LiveKitWebRTC.framework",
+      "PlatformAgnosticAssetTypes.framework",
+      "Sentry.framework"
+    ],
+    "featureResourceBundles": [],
+    "bundleMetadata": {}
+  },
+  "2026": {
+    "release": "1.2026.266",
+    "bundleID": "com.openai.chat",
+    "minimumOS": "18.0",
+    "appExtensions": [
+      "AskChatGPTActionExtension.appex",
+      "ChatGPTSearchSafariExtension.appex",
+      "FinanceKitBackgroundDeliveryExtension.appex",
+      "MessagesExtension.appex",
+      "NotificationServiceExtension.appex",
+      "ShareExtension.appex",
+      "VoiceScreenSharing.appex",
+      "Widgets.appex"
+    ],
+    "dylibFrameworks": [
+      "ChatGPT.framework",
+      "ChatGPTFinanceExperianImplementation.framework",
+      "ExperianIDVerifySDK.framework",
+      "LinkKit.framework",
+      "LiveKitWebRTC.framework",
+      "Lottie.framework",
+      "OpenAIXPlat.framework"
+    ],
+    "featureResourceBundles": [
+      "Assets_Assets.bundle",
+      "ChatGPTAudioAttachments_ChatGPTAudioAttachments.bundle",
+      "ChatGPTAudioAttachments_ChatGPTAudioAttachmentsInterface.bundle",
+      "ChatGPTAvatar_ChatGPTAvatar.bundle",
+      "ChatGPTBeacons_ChatGPTBeacons.bundle",
+      "ChatGPTBirthday_ChatGPTBirthday.bundle",
+      "ChatGPTCalpico_CalpicoCoreUI.bundle",
+      "ChatGPTConnectors_ChatGPTConnectors.bundle",
+      "ChatGPTDisclosures_ChatGPTDisclosures.bundle",
+      "ChatGPTFinance_ChatGPTFinance.bundle",
+      "ChatGPTHealth_ChatGPTHealth.bundle",
+      "ChatGPTLockedChats_ChatGPTLockedChats.bundle",
+      "ChatGPTLogin_ChatGPTLogin.bundle",
+      "ChatGPTMedia_ChatGPTMedia.bundle",
+      "ChatGPTMemory_ChatGPTMemory.bundle",
+      "ChatGPTMessages_ChatGPTMessageRowParts.bundle",
+      "ChatGPTSharing_ChatGPTSharing.bundle",
+      "ChatGPTSkills_ChatGPTSkillsDirectory.bundle",
+      "ChatGPTVoice_ChatGPTVoice.bundle",
+      "ChatGPTVoice_ChatGPTVoiceAudio.bundle",
+      "ChatGPTWallet_ChatGPTWallet.bundle",
+      "ChatGPTWritingBlocks_ChatGPTWritingBlocks.bundle",
+      "CodexRemote_CodexRemoteCore.bundle",
+      "CodexRemote_CodexRemoteThread.bundle",
+      "Device_DeviceHaptics.bundle",
+      "DotBall_DotBall.bundle",
+      "EmojiKit_EmojiKit.bundle",
+      "Factory_FactoryKit.bundle",
+      "Highlightr_Highlightr.bundle",
+      "Kingfisher_Kingfisher.bundle",
+      "OAIMarkdown_OAIMarkdown.bundle",
+      "OrbitCharacters_OrbitCharacters.bundle",
+      "PhoneNumberKit_PhoneNumberKit.bundle",
+      "RevenueCat_RevenueCat_CustomEntitlementComputation.bundle",
+      "Segment_Segment.bundle",
+      "Stripe_StripeCore.bundle",
+      "Stripe_StripePaymentSheet.bundle",
+      "Stripe_StripePayments.bundle",
+      "Stripe_StripePaymentsUI.bundle",
+      "Stripe_StripeUICore.bundle",
+      "Styleguide_SwiftUIStyleguide.bundle",
+      "SwiftCSV_SwiftCSV.bundle",
+      "TibroCore_TibroCore.bundle",
+      "mathFonts.bundle",
+      "swift-nio_NIOPosix.bundle"
+    ],
+    "bundleMetadata": {
+      "Stripe_StripePayments.bundle": {
+        "identifier": "com.openai.generated.StripePaymentsResourcesInfoPlist",
+        "name": "StripePaymentsResourcesInfoPlist"
+      },
+      "ChatGPTHealth_ChatGPTHealth.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTHealth.ChatGPTHealthResourcesInfoPlist",
+        "name": "ChatGPTHealthResourcesInfoPlist"
+      },
+      "ChatGPTSkills_ChatGPTSkillsDirectory.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTSkills.ChatGPTSkillsDirectoryResourcesInfoPlist",
+        "name": "ChatGPTSkillsDirectoryResourcesInfoPlist"
+      },
+      "DotBall_DotBall.bundle": {
+        "identifier": "com.openai.generated.Packages.DotBall.DotBallResourcesInfoPlist",
+        "name": "DotBallResourcesInfoPlist"
+      },
+      "ChatGPTBeacons_ChatGPTBeacons.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTBeacons.ChatGPTBeaconsResourcesInfoPlist",
+        "name": "ChatGPTBeaconsResourcesInfoPlist"
+      },
+      "Segment_Segment.bundle": {
+        "identifier": "com.openai.generated.SegmentResourcesInfoPlist",
+        "name": "SegmentResourcesInfoPlist"
+      },
+      "ChatGPTSharing_ChatGPTSharing.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTSharing.ChatGPTSharingResourcesInfoPlist",
+        "name": "ChatGPTSharingResourcesInfoPlist"
+      },
+      "ChatGPTLogin_ChatGPTLogin.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTLogin.ChatGPTLoginResourcesInfoPlist",
+        "name": "ChatGPTLoginResourcesInfoPlist"
+      },
+      "RevenueCat_RevenueCat_CustomEntitlementComputation.bundle": {
+        "identifier": "com.openai.generated.RevenueCat_CustomEntitlementComputationResourcesInfoPlist",
+        "name": "RevenueCat_CustomEntitlementComputationResourcesInfoPlist"
+      },
+      "Assets_Assets.bundle": {
+        "identifier": "com.openai.generated.Packages.Assets.AssetsResourcesInfoPlist",
+        "name": "AssetsResourcesInfoPlist"
+      },
+      "ChatGPTFinance_ChatGPTFinance.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTFinance.ChatGPTFinanceResourcesInfoPlist",
+        "name": "ChatGPTFinanceResourcesInfoPlist"
+      },
+      "ChatGPTMessages_ChatGPTMessageRowParts.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTMessages.ChatGPTMessageRowPartsResourcesInfoPlist",
+        "name": "ChatGPTMessageRowPartsResourcesInfoPlist"
+      },
+      "ChatGPTDisclosures_ChatGPTDisclosures.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTDisclosures.ChatGPTDisclosuresResourcesInfoPlist",
+        "name": "ChatGPTDisclosuresResourcesInfoPlist"
+      },
+      "ChatGPTAudioAttachments_ChatGPTAudioAttachmentsInterface.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTAudioAttachments.ChatGPTAudioAttachmentsInterfaceResourcesInfoPlist",
+        "name": "ChatGPTAudioAttachmentsInterfaceResourcesInfoPlist"
+      },
+      "CodexRemote_CodexRemoteThread.bundle": {
+        "identifier": "com.openai.generated.Packages.CodexRemote.CodexRemoteThreadResourcesInfoPlist",
+        "name": "CodexRemoteThreadResourcesInfoPlist"
+      },
+      "SwiftCSV_SwiftCSV.bundle": {
+        "identifier": "com.openai.generated.SwiftCSVResourcesInfoPlist",
+        "name": "SwiftCSVResourcesInfoPlist"
+      },
+      "TibroCore_TibroCore.bundle": {
+        "identifier": "com.openai.generated.Packages.TibroCore.TibroCoreResourcesInfoPlist",
+        "name": "TibroCoreResourcesInfoPlist"
+      },
+      "swift-nio_NIOPosix.bundle": {
+        "identifier": "com.openai.generated.NIOPosixResourcesInfoPlist",
+        "name": "NIOPosixResourcesInfoPlist"
+      },
+      "OAIMarkdown_OAIMarkdown.bundle": {
+        "identifier": "com.openai.generated.Packages.OAIMarkdown.OAIMarkdownResourcesInfoPlist",
+        "name": "OAIMarkdownResourcesInfoPlist"
+      },
+      "Device_DeviceHaptics.bundle": {
+        "identifier": "com.openai.generated.Packages.Device.DeviceHapticsResourcesInfoPlist",
+        "name": "DeviceHapticsResourcesInfoPlist"
+      },
+      "Stripe_StripeCore.bundle": {
+        "identifier": "com.openai.generated.StripeCoreResourcesInfoPlist",
+        "name": "StripeCoreResourcesInfoPlist"
+      },
+      "Stripe_StripePaymentSheet.bundle": {
+        "identifier": "com.openai.generated.StripePaymentSheetResourcesInfoPlist",
+        "name": "StripePaymentSheetResourcesInfoPlist"
+      },
+      "ChatGPTAudioAttachments_ChatGPTAudioAttachments.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTAudioAttachments.ChatGPTAudioAttachmentsResourcesInfoPlist",
+        "name": "ChatGPTAudioAttachmentsResourcesInfoPlist"
+      },
+      "Stripe_StripeUICore.bundle": {
+        "identifier": "com.openai.generated.StripeUICoreResourcesInfoPlist",
+        "name": "StripeUICoreResourcesInfoPlist"
+      },
+      "ChatGPTConnectors_ChatGPTConnectors.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTConnectors.ChatGPTConnectorsResourcesInfoPlist",
+        "name": "ChatGPTConnectorsResourcesInfoPlist"
+      },
+      "Factory_FactoryKit.bundle": {
+        "identifier": "com.openai.generated.FactoryKitResourcesInfoPlist",
+        "name": "FactoryKitResourcesInfoPlist"
+      },
+      "ChatGPTBirthday_ChatGPTBirthday.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTBirthday.ChatGPTBirthdayResourcesInfoPlist",
+        "name": "ChatGPTBirthdayResourcesInfoPlist"
+      },
+      "ChatGPTWritingBlocks_ChatGPTWritingBlocks.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTWritingBlocks.ChatGPTWritingBlocksResourcesInfoPlist",
+        "name": "ChatGPTWritingBlocksResourcesInfoPlist"
+      },
+      "ChatGPTVoice_ChatGPTVoiceAudio.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTVoice.ChatGPTVoiceAudioResourcesInfoPlist",
+        "name": "ChatGPTVoiceAudioResourcesInfoPlist"
+      },
+      "mathFonts.bundle": {
+        "identifier": "com.openai.generated.mathFontsResourcesInfoPlist",
+        "name": "mathFontsResourcesInfoPlist"
+      },
+      "ChatGPTMedia_ChatGPTMedia.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTMedia.ChatGPTMediaResourcesInfoPlist",
+        "name": "ChatGPTMediaResourcesInfoPlist"
+      },
+      "Styleguide_SwiftUIStyleguide.bundle": {
+        "identifier": "com.openai.generated.Packages.Styleguide.SwiftUIStyleguideResourcesInfoPlist",
+        "name": "SwiftUIStyleguideResourcesInfoPlist"
+      },
+      "Highlightr_Highlightr.bundle": {
+        "identifier": "com.openai.generated.HighlightrResourcesInfoPlist",
+        "name": "HighlightrResourcesInfoPlist"
+      },
+      "Stripe_StripePaymentsUI.bundle": {
+        "identifier": "com.openai.generated.StripePaymentsUIResourcesInfoPlist",
+        "name": "StripePaymentsUIResourcesInfoPlist"
+      },
+      "OrbitCharacters_OrbitCharacters.bundle": {
+        "identifier": "com.openai.generated.OrbitCharactersResourcesInfoPlist",
+        "name": "OrbitCharactersResourcesInfoPlist"
+      },
+      "ChatGPTVoice_ChatGPTVoice.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTVoice.ChatGPTVoiceResourcesInfoPlist",
+        "name": "ChatGPTVoiceResourcesInfoPlist"
+      },
+      "CodexRemote_CodexRemoteCore.bundle": {
+        "identifier": "com.openai.generated.Packages.CodexRemote.CodexRemoteCoreResourcesInfoPlist",
+        "name": "CodexRemoteCoreResourcesInfoPlist"
+      },
+      "Kingfisher_Kingfisher.bundle": {
+        "identifier": "com.openai.generated.KingfisherResourcesInfoPlist",
+        "name": "KingfisherResourcesInfoPlist"
+      },
+      "ChatGPTLockedChats_ChatGPTLockedChats.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTLockedChats.ChatGPTLockedChatsResourcesInfoPlist",
+        "name": "ChatGPTLockedChatsResourcesInfoPlist"
+      },
+      "PhoneNumberKit_PhoneNumberKit.bundle": {
+        "identifier": "com.openai.generated.PhoneNumberKitResourcesInfoPlist",
+        "name": "PhoneNumberKitResourcesInfoPlist"
+      },
+      "ChatGPTMemory_ChatGPTMemory.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTMemory.ChatGPTMemoryResourcesInfoPlist",
+        "name": "ChatGPTMemoryResourcesInfoPlist"
+      },
+      "ChatGPTAvatar_ChatGPTAvatar.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTAvatar.ChatGPTAvatarResourcesInfoPlist",
+        "name": "ChatGPTAvatarResourcesInfoPlist"
+      },
+      "ChatGPTWallet_ChatGPTWallet.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTWallet.ChatGPTWalletResourcesInfoPlist",
+        "name": "ChatGPTWalletResourcesInfoPlist"
+      },
+      "ChatGPTCalpico_CalpicoCoreUI.bundle": {
+        "identifier": "com.openai.generated.Packages.ChatGPTCalpico.CalpicoCoreUIResourcesInfoPlist",
+        "name": "CalpicoCoreUIResourcesInfoPlist"
+      },
+      "EmojiKit_EmojiKit.bundle": {
+        "identifier": "com.openai.generated.EmojiKitResourcesInfoPlist",
+        "name": "EmojiKitResourcesInfoPlist"
+      }
+    }
+  }
+}

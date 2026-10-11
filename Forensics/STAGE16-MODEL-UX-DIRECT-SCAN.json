@@ -1,0 +1,143 @@
+{
+  "method": "Literal UTF-8 byte-substring presence in user-supplied decrypted ChatGPT.framework Mach-O binaries; presence does not prove behavior, absence does not prove feature absent.",
+  "2024": {
+    "SendLongPressModelSelector": {
+      "count": 0,
+      "found": false
+    },
+    "ComposerModelPickerUIKitMenuBuilder": {
+      "count": 0,
+      "found": false
+    },
+    "MessageInputLongPressModelSelectorView": {
+      "count": 0,
+      "found": false
+    },
+    "ConversationDraftLifecycleTracker": {
+      "count": 0,
+      "found": false
+    },
+    "ChatGPTModels": {
+      "count": 0,
+      "found": false
+    },
+    "ModelContextWindow": {
+      "count": 0,
+      "found": false
+    },
+    "context_window": {
+      "count": 0,
+      "found": false
+    },
+    "usage_limit": {
+      "count": 0,
+      "found": false
+    },
+    "UsageLimit": {
+      "count": 0,
+      "found": false
+    },
+    "ContextWindow": {
+      "count": 0,
+      "found": false
+    },
+    "MessageSourcesView": {
+      "count": 2,
+      "found": true
+    },
+    "ChatGPTLockedChats": {
+      "count": 0,
+      "found": false
+    },
+    "Capacity": {
+      "count": 56,
+      "found": true
+    },
+    "model_picker": {
+      "count": 0,
+      "found": false
+    },
+    "ModelPicker": {
+      "count": 0,
+      "found": false
+    },
+    "ChatGPTAccountPlan": {
+      "count": 0,
+      "found": false
+    },
+    "ModelRouting": {
+      "count": 0,
+      "found": false
+    }
+  },
+  "2026": {
+    "SendLongPressModelSelector": {
+      "count": 7,
+      "found": true
+    },
+    "ComposerModelPickerUIKitMenuBuilder": {
+      "count": 1,
+      "found": true
+    },
+    "MessageInputLongPressModelSelectorView": {
+      "count": 4,
+      "found": true
+    },
+    "ConversationDraftLifecycleTracker": {
+      "count": 3,
+      "found": true
+    },
+    "ChatGPTModels": {
+      "count": 0,
+      "found": false
+    },
+    "ModelContextWindow": {
+      "count": 0,
+      "found": false
+    },
+    "context_window": {
+      "count": 5,
+      "found": true
+    },
+    "usage_limit": {
+      "count": 22,
+      "found": true
+    },
+    "UsageLimit": {
+      "count": 108,
+      "found": true
+    },
+    "ContextWindow": {
+      "count": 4,
+      "found": true
+    },
+    "MessageSourcesView": {
+      "count": 4,
+      "found": true
+    },
+    "ChatGPTLockedChats": {
+      "count": 49,
+      "found": true
+    },
+    "Capacity": {
+      "count": 57,
+      "found": true
+    },
+    "model_picker": {
+      "count": 23,
+      "found": true
+    },
+    "ModelPicker": {
+      "count": 64,
+      "found": true
+    },
+    "ChatGPTAccountPlan": {
+      "count": 0,
+      "found": false
+    },
+    "ModelRouting": {
+      "count": 0,
+      "found": false
+    }
+  }
+}

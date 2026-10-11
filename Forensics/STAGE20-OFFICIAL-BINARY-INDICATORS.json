@@ -1,0 +1,388 @@
+{
+  "scope": "literal identifier scan of supplied official IPA binaries",
+  "warning": "Literal references are not original source or proof of behavior.",
+  "2024": {
+    "framework_member": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/ChatGPT",
+    "framework_bytes": 41854272,
+    "indicators": {
+      "CalpicoMessageActionsSheet": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "CalpicoMessageContextMenuInteraction": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "MessageRowContextMenuPart": {
+        "found": true,
+        "sample_offsets": [
+          29630736,
+          30616448
+        ]
+      },
+      "SendLongPressModelSelector": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "ComposerModelPickerUIKitMenuBuilder": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "ConversationDraftLifecycleTracker": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "MessageSourcesView": {
+        "found": true,
+        "sample_offsets": [
+          29648928,
+          30618848
+        ]
+      },
+      "MessageEditingAttachmentRestorer": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "ConversationBranchingService": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "ConversationModelSelectionStore": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "UsageLimitsDashboardViewModel": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "UsageLimitsDashboardProgressBar": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "LockedChatsBiometricCredentialStore": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "NativeAuthPasskeyAuthenticator": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "NativeAuthUsernamelessPasskeyLoginCoordinator": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "CalpicoConversationsRepository": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "FileCalpicoConversationsCache": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "ChatGPTWritingBlocks": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "ChatGPTAudioAttachments": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "ChatGPTConnectors": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "ChatGPTMemory": {
+        "found": true,
+        "sample_offsets": [
+          29585340,
+          30600016,
+          30600096,
+          30600758,
+          30601264,
+          30601462,
+          30601664,
+          30601888
+        ]
+      },
+      "ChatGPTVoice": {
+        "found": true,
+        "sample_offsets": [
+          29697560,
+          29744360,
+          30099184,
+          30101536,
+          30649584,
+          30649696,
+          30649782,
+          30649856
+        ]
+      },
+      "ChatGPTLockedChats": {
+        "found": false,
+        "sample_offsets": []
+      },
+      "ChatGPTLogin": {
+        "found": true,
+        "sample_offsets": [
+          29570624,
+          30586806,
+          30586902,
+          30587184,
+          30587310,
+          30588080,
+          30588262,
+          30588768
+        ]
+      }
+    }
+  },
+  "2026": {
+    "framework_member": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/ChatGPT",
+    "framework_bytes": 174277744,
+    "indicators": {
+      "CalpicoMessageActionsSheet": {
+        "found": true,
+        "sample_offsets": [
+          119593680,
+          119626128,
+          119637920,
+          145173941
+        ]
+      },
+      "CalpicoMessageContextMenuInteraction": {
+        "found": true,
+        "sample_offsets": [
+          119596896,
+          128460862,
+          128463678,
+          145175557
+        ]
+      },
+      "MessageRowContextMenuPart": {
+        "found": true,
+        "sample_offsets": [
+          120050128,
+          128638642
+        ]
+      },
+      "SendLongPressModelSelector": {
+        "found": true,
+        "sample_offsets": [
+          122555360,
+          129297163,
+          129311727,
+          139984564,
+          140299590,
+          143914324,
+          143917094
+        ]
+      },
+      "ComposerModelPickerUIKitMenuBuilder": {
+        "found": true,
+        "sample_offsets": [
+          122958912
+        ]
+      },
+      "ConversationDraftLifecycleTracker": {
+        "found": true,
+        "sample_offsets": [
+          122549392,
+          129322516,
+          145268155
+        ]
+      },
+      "MessageSourcesView": {
+        "found": true,
+        "sample_offsets": [
+          120042240,
+          120048928,
+          120048960,
+          128643426
+        ]
+      },
+      "MessageEditingAttachmentRestorer": {
+        "found": true,
+        "sample_offsets": [
+          122585952,
+          129309444
+        ]
+      },
+      "ConversationBranchingService": {
+        "found": true,
+        "sample_offsets": [
+          118379421,
+          119889351,
+          119889415,
+          119892439,
+          119929479,
+          124101680,
+          124101728,
+          128551230
+        ]
+      },
+      "ConversationModelSelectionStore": {
+        "found": true,
+        "sample_offsets": [
+          122959040,
+          145293661,
+          145293726
+        ]
+      },
+      "UsageLimitsDashboardViewModel": {
+        "found": true,
+        "sample_offsets": [
+          122811072,
+          122817984,
+          129412991,
+          145289574,
+          145289639
+        ]
+      },
+      "UsageLimitsDashboardProgressBar": {
+        "found": true,
+        "sample_offsets": [
+          122836000
+        ]
+      },
+      "LockedChatsBiometricCredentialStore": {
+        "found": true,
+        "sample_offsets": [
+          119010832,
+          119010919,
+          128255747,
+          145148033,
+          145148114
+        ]
+      },
+      "NativeAuthPasskeyAuthenticator": {
+        "found": true,
+        "sample_offsets": [
+          119028528,
+          145149556
+        ]
+      },
+      "NativeAuthUsernamelessPasskeyLoginCoordinator": {
+        "found": true,
+        "sample_offsets": [
+          119028688,
+          119028784,
+          128267949,
+          131631876,
+          145149732
+        ]
+      },
+      "CalpicoConversationsRepository": {
+        "found": true,
+        "sample_offsets": [
+          118375325,
+          123482768,
+          123482816,
+          123482848,
+          123482903,
+          123483079,
+          123491687,
+          123535719
+        ]
+      },
+      "FileCalpicoConversationsCache": {
+        "found": true,
+        "sample_offsets": [
+          123488400,
+          129649212,
+          145319971
+        ]
+      },
+      "ChatGPTWritingBlocks": {
+        "found": true,
+        "sample_offsets": [
+          120615696,
+          128831856,
+          128831968,
+          128832064,
+          128833168,
+          128833392,
+          128833648,
+          128833744
+        ]
+      },
+      "ChatGPTAudioAttachments": {
+        "found": true,
+        "sample_offsets": [
+          122649248,
+          122651776,
+          129330960,
+          129331024,
+          137002330,
+          137002422,
+          137004262,
+          137004326
+        ]
+      },
+      "ChatGPTConnectors": {
+        "found": true,
+        "sample_offsets": [
+          122735328,
+          123726912,
+          129387296,
+          129387344,
+          129388736,
+          129388876,
+          129388992,
+          129390176
+        ]
+      },
+      "ChatGPTMemory": {
+        "found": true,
+        "sample_offsets": [
+          122916776,
+          122950928,
+          129455328,
+          129455376,
+          129455584,
+          129455728,
+          129457168,
+          129457344
+        ]
+      },
+      "ChatGPTVoice": {
+        "found": true,
+        "sample_offsets": [
+          119388128,
+          123062064,
+          123118224,
+          123123488,
+          123130496,
+          123330496,
+          123335392,
+          123343024
+        ]
+      },
+      "ChatGPTLockedChats": {
+        "found": true,
+        "sample_offsets": [
+          118428274,
+          118428370,
+          119010128,
+          123580608,
+          128066007,
+          128253664,
+          128253868,
+          128253936
+        ]
+      },
+      "ChatGPTLogin": {
+        "found": true,
+        "sample_offsets": [
+          119027072,
+          119073272,
+          123745616,
+          128258768,
+          128258800,
+          128260284,
+          128260480,
+          128261520
+        ]
+      }
+    }
+  }
+}

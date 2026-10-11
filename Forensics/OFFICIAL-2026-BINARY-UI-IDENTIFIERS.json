@@ -1,0 +1,135 @@
+{
+  "message_action_context_sheet": [
+    {
+      "identifier": "CalpicoMessageActionsSheet",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "CalpicoMessageContextMenuInteraction",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "MessageRowContextMenuPart",
+      "present_in_2026": true,
+      "present_in_2024": true
+    },
+    {
+      "identifier": "MessageRowActionAnalytics",
+      "present_in_2026": false,
+      "present_in_2024": false
+    }
+  ],
+  "composer_model_selection": [
+    {
+      "identifier": "SendLongPressModelSelector",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "MessageInputLongPressModelSelectorView",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "ComposerModelPickerNativeMenuAnchor",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "ComposerModelPickerUIKitMenuBuilder",
+      "present_in_2026": true,
+      "present_in_2024": false
+    }
+  ],
+  "conversation_drafts": [
+    {
+      "identifier": "ConversationDraftLifecycleTracker",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "MessageInput/ConversationDraftLifecycleTracker.swift",
+      "present_in_2026": false,
+      "present_in_2024": false
+    }
+  ],
+  "biometric_locked_chats": [
+    {
+      "identifier": "ChatGPTLockedChats/LockedChatsBiometricCredentialStore.swift",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "ChatGPTLockedChats/LockedChatsPINFlowViewModel.swift",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "PasskeysView",
+      "present_in_2026": true,
+      "present_in_2024": false
+    }
+  ],
+  "native_passkey_auth": [
+    {
+      "identifier": "NativeAuthPasskeyAuthenticator",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "NativeAuthUsernamelessPasskeyLoginCoordinator",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "NativeAuthPasskeyLoginView",
+      "present_in_2026": true,
+      "present_in_2024": false
+    }
+  ],
+  "message_sources": [
+    {
+      "identifier": "ChatGPTMessageRow/MessageSourcesView.swift",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "ChatGPTMessageRow/MessageSourcesPresentationModel",
+      "present_in_2026": false,
+      "present_in_2024": false
+    }
+  ],
+  "message_markup": [
+    {
+      "identifier": "ChatGPTMessageRow/MessageAssistantContentStack.swift",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "OAIMarkdown",
+      "present_in_2026": true,
+      "present_in_2024": true
+    }
+  ],
+  "media_file_restore": [
+    {
+      "identifier": "ChatGPTMessageInput/MessageEditingAttachmentRestorer.swift",
+      "present_in_2026": true,
+      "present_in_2024": false
+    },
+    {
+      "identifier": "ChatGPTMessageInput/LibraryFileUploadRestorer.swift",
+      "present_in_2026": true,
+      "present_in_2024": false
+    }
+  ],
+  "writing_blocks": [
+    {
+      "identifier": "ChatGPTMessages/WritingBlockConversationComposerViewModel.swift",
+      "present_in_2026": true,
+      "present_in_2024": false
+    }
+  ]
+}

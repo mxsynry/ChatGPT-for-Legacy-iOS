@@ -1,0 +1,25 @@
+{
+  "search_method": "ASCII substring scan of ChatGPT.framework Mach-O for known symbol and source-path metadata; presence is not original source or proof of backend contract",
+  "results": {
+    "2024": {
+      "ChatGPTHistory/HistoryViewModel.swift": true,
+      "CalpicoConversationsRepository": false,
+      "FileCalpicoConversationsCache.swift": false,
+      "ChatGPTLogin/NativeAuthPasskey.swift": false,
+      "NativeAuthUsernamelessPasskeyLoginCoordinator": false,
+      "auth.openai.com/api/accounts/authorize": false,
+      "/backend-api": true,
+      "ChatGPTLockedChats/LockedChatsBiometricCredentialStore.swift": false
+    },
+    "2026": {
+      "ChatGPTHistory/HistoryViewModel.swift": true,
+      "CalpicoConversationsRepository": true,
+      "FileCalpicoConversationsCache.swift": true,
+      "ChatGPTLogin/NativeAuthPasskey.swift": true,
+      "NativeAuthUsernamelessPasskeyLoginCoordinator": true,
+      "auth.openai.com/api/accounts/authorize": true,
+      "/backend-api": true,
+      "ChatGPTLockedChats/LockedChatsBiometricCredentialStore.swift": true
+    }
+  }
+}

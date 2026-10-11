@@ -1,0 +1,14 @@
+{
+  "test_run": "2026-10-09",
+  "portable_regression_checks": 78,
+  "status": "passed",
+  "output": [
+    "PASS: 78 source regression checks",
+    "PASS: Swift parse + portable regression checks + no direct private backend usage"
+  ],
+  "swift_syntax_parse": "passed",
+  "ios_sdk_typecheck": "not_run_linux",
+  "xcode_compile": "not_run",
+  "real_device_oauth": "not_tested",
+  "official_executable_embedded": false
+}

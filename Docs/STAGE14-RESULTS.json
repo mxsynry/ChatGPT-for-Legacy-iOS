@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-09",
+  "kind": "source/pre-device-only",
+  "portable_regression_passes": 62,
+  "swift_parser": "pass",
+  "xcode_compiler": "not_run",
+  "iphone_8_plus": "not_tested",
+  "google_oauth": "unverified",
+  "openai_passkey": "unverified",
+  "keychain_device_runtime": "unverified",
+  "cloud_history": "not_accessible_via_supported_3p_scopes",
+  "auth_mode": "explicit_billing_route",
+  "test_command": "sh Scripts/preflight.sh"
+}

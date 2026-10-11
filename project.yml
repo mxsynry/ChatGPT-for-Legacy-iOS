@@ -1,0 +1,27 @@
+name: ChatGPTReconstructed
+options:
+  bundleIdPrefix: dev.ios16reconstruction
+settings:
+  base:
+    IPHONEOS_DEPLOYMENT_TARGET: '16.0'
+    SWIFT_VERSION: '5.0'
+    TARGETED_DEVICE_FAMILY: '1'
+targets:
+  ChatGPTReconstructed:
+    type: application
+    platform: iOS
+    deploymentTarget: '16.0'
+    sources: [App]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.ios16reconstruction.chat
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: OpenChat16
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Record audio for speech-to-text dictation."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Turn your spoken words into text for chat messages."
+        INFOPLIST_KEY_NSCameraUsageDescription: "Take photos to attach to a chat."
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Choose a photo to attach to a chat."
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: "Receive the local 127.0.0.1 authorization callback during ChatGPT account sign-in."
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        CODE_SIGNING_ALLOWED: NO
