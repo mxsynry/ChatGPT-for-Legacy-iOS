@@ -1,4 +1,4 @@
-name: iOS 16 Reconstruction — Stabilization V22
+name: NEXTGEN SwiftUI iOS16 — V22 (NOT bag.xml)
 on:
   workflow_dispatch:
   push:
@@ -31,6 +31,8 @@ jobs:
       - name: Verify generated Xcode scheme
         run: xcodebuild -list -project ChatGPTReconstructed.xcodeproj
       - name: Simulator SDK compile (no simulator runtime needed)
+        id: simulator
+        continue-on-error: true
         shell: bash
         run: |
           set -o pipefail
@@ -39,6 +41,8 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/SimDerivedData" CODE_SIGNING_ALLOWED=NO build \
             2>&1 | tee "$GITHUB_WORKSPACE/build-simulator.log"
       - name: iOS device SDK compile
+        id: device
+        continue-on-error: true
         shell: bash
         run: |
           set -o pipefail
@@ -47,6 +51,7 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/DerivedData" CODE_SIGNING_ALLOWED=NO build \
             2>&1 | tee "$GITHUB_WORKSPACE/build-device.log"
       - name: Package unsigned TrollStore candidate (not installed/tested)
+        if: steps.preflight.outcome == 'success' && steps.simulator.outcome == 'success' && steps.device.outcome == 'success'
         shell: bash
         run: |
           set -e
@@ -56,14 +61,14 @@ jobs:
           zip -qr "$GITHUB_WORKSPACE/OpenChat16-V22-unsigned.ipa" Payload
       - name: Upload compiled IPA candidate
         uses: actions/upload-artifact@v4
-        if: success() && steps.preflight.outcome == 'success'
+        if: success() && steps.preflight.outcome == 'success' && steps.simulator.outcome == 'success' && steps.device.outcome == 'success'
         with:
           name: OpenChat16-V22-unsigned
           path: OpenChat16-V22-unsigned.ipa
-      - name: Fail if portable checks failed
-        if: always() && steps.preflight.outcome == 'failure'
+      - name: Fail if any required check or compilation failed
+        if: always() && (steps.preflight.outcome != 'success' || steps.simulator.outcome != 'success' || steps.device.outcome != 'success')
         run: |
-          echo 'Preflight failed. Compilation was attempted for diagnostics; no IPA released.'
+          echo 'Preflight or one of the Xcode builds failed. Both compile logs were retained; no IPA released.'
           exit 1
       - name: Upload build diagnostics even if compile fails
         uses: actions/upload-artifact@v4

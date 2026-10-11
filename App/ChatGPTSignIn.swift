@@ -227,7 +227,8 @@ private final class LoopbackCallback {
         else { pending.resume(returning: ()) }
     }
     func start() async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation {
+            (continuation: CheckedContinuation<Void, Error>) in
             queue.async {
                 guard !self.completed else {
                     continuation.resume(throwing: SignInFailure.cancelled)
@@ -273,7 +274,8 @@ private final class LoopbackCallback {
         queue.sync { self.expectedState = expectedState }
     }
     func wait() async throws -> URL {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation {
+            (continuation: CheckedContinuation<URL, Error>) in
             queue.async {
                 if let url = self.receivedURL { continuation.resume(returning: url) }
                 else if self.completed { continuation.resume(throwing: SignInFailure.cancelled) }

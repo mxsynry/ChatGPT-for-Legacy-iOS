@@ -63,10 +63,14 @@ enum ThumbnailDecoder {
     static let maxPixelEdge = 520
 
     static func decode(_ source: String) -> UIImage? {
+        // Keep the base64 payload as a String; Foundation's Data initializer
+        // does not consistently resolve a Substring across Apple SDKs.
+        let fields = source.split(separator: ",", maxSplits: 1,
+                                  omittingEmptySubsequences: false)
         guard source.count <= maxEncodedCharacters,
               source.hasPrefix("data:image/"),
-              let separator = source.firstIndex(of: ","),
-              let imageBytes = Data(base64Encoded: source[source.index(after: separator)...],
+              fields.count == 2,
+              let imageBytes = Data(base64Encoded: String(fields[1]),
                                     options: .ignoreUnknownCharacters),
               imageBytes.count <= 2_600_000,
               let dataSource = CGImageSourceCreateWithData(imageBytes as CFData, nil) else { return nil }

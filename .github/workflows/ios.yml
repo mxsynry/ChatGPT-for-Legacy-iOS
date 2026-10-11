@@ -1,4 +1,4 @@
-name: Build Unsigned iOS IPA
+name: LEGACY bag.xml unsigned IPA — NOT NEXTGEN
 
 on:
   push:
@@ -13,6 +13,12 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      - name: Refuse legacy app build on nextgen
+        run: |
+          if [ "$GITHUB_REF_NAME" = "nextgen" ]; then
+            echo '::error::Wrong workflow: this builds ChatGPT.xcodeproj (bag.xml). Use NEXTGEN SwiftUI iOS16 instead.'
+            exit 1
+          fi
       - name: Checkout repository
         uses: actions/checkout@v4
 
