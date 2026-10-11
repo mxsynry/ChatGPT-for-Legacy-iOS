@@ -99,64 +99,538 @@ struct RootView: View {
     }
     private var isChatGPTPlan: Bool { AuthBillingChoice.route == .chatgptPlan }
     var body: some View {
-        ZStack {
-        NavigationStack {
-            VStack(spacing: 0) {
-                if store.startupRecoveryNotice != nil {
-                    HStack(spacing: 8) {
-                        Image(systemName: "externaldrive.badge.exclamationmark")
-                        Text("Saved history needs recovery")
-                            .font(.caption)
-                        Spacer()
-                        Button("Details") { showSettings = true }
-                            .font(.caption.weight(.semibold))
-                    }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .accessibilityElement(children: .combine)
+        rootOverlays
+        .sheet(isPresented: $showUsage) {
+            UsageInfoSheet(
+                isChatGPTPlan: isChatGPTPlan,
+                lastUsage: selected?.lastUsage,
+                lastRateLimits: selected?.lastRateLimits)
+        }
+        .sheet(isPresented: $showBranchVersions) {
+            BranchVersionsSheet(
+                currentID: store.selectedID,
+                conversations: store.conversations,
+                onChoose: { id in
+                    // Conversation switch retains per-chat drafts via the existing
+                    // onChange handler. Never alter the parent or branch messages.
+                    store.selectedID = id
+                    showBranchVersions = false
+                },
+                onClose: { showBranchVersions = false }
+            )
+        }
+        .sheet(item: $branchContext) { context in
+            BranchCreateSheet(context: context, models: modelOptions,
+                              onCreate: { mode, chosenModel, effort, temporary in
+                guard store.branch(from: context.conversationID, at: context.messageID,
+                                   mode: mode, modelID: chosenModel,
+                                   reasoning: effort, temporary: temporary) != nil else {
+                    requestError = "The selected message is no longer available."
+                    branchContext = nil
+                    return
                 }
-                ModelAndUsageBar(
-                    modelName: selectedModelLabel,
-                    isChatGPTPlan: isChatGPTPlan,
-                    lastUsage: selected?.lastUsage,
-                    lastRateLimits: selected?.lastRateLimits,
-                    onModel: { showModelPicker = true },
-                    onBranch: { openBranchFromHere(messageID: nil) },
-                    onUsage: { showUsage = true }
-                )
-                if let chat = selected,
-                   chat.branchedFrom == nil,
-                   store.conversations.contains(where: {
-                       $0.branchedFrom?.parentConversationID == chat.id
-                   }) {
-                    HStack {
-                        Label("This chat has alternate branches", systemImage: "arrow.triangle.branch")
-                            .font(.caption)
-                        Spacer()
-                        Button("View branches") { showBranchVersions = true }
-                            .font(.caption)
-                    }
-                    .padding(.horizontal, 14).padding(.vertical, 4)
-                    .foregroundColor(.secondary)
+                branchContext = nil
+                followLatest = true
+            }, onCancel: { branchContext = nil })
+        }
+        .sheet(isPresented: $showModelPicker) {
+                modelPickerContent
+            }
+        .onChange(of: chatGPTSignIn.session?.clientID) { _ in
+            modelOptions = []
+            modelLoadError = nil
+            // New accounts must not reuse a previous account's model catalog.
+            // Invalidate any in-flight fetch even if login is still busy.
+            modelFetchID = UUID()
+            if !chatGPTSignIn.busy { fetchModels() }
+        }
+        .onChange(of: chatGPTSignIn.busy) { busy in
+            // Account commit occurs while the login Task still owns busy=true.
+            // Load models once the account transaction completes.
+            if !busy && chatGPTSignIn.session?.canUsePlan == true {
+                fetchModels()
+            }
+        }
+        .onChange(of: scenePhase) { phase in
+            if phase == .active {
+                privacyShieldActive = false
+                restoringDraft = true
+                input = lockedSelection == nil ? store.draft(for: store.selectedID) : ""
+                DispatchQueue.main.async { restoringDraft = false }
+            }
+            if phase != .active {
+                // Clear decrypted thumbnails/parsed message content on app switch.
+                ThumbnailCache.clear()
+                MarkdownRenderCache.clear()
+                if !chatGPTSignIn.busy { privacyShieldActive = true }
+                // Commit the current draft before hiding it. Wiping the composer
+                // without this save would lose text on permission dialogs/switching.
+                draftSaveTask?.cancel()
+                if let chat = selected { store.saveDraft(input, in: chat.id) }
+                restoringDraft = true
+                input = ""
+                // Prevent a response from appearing behind the app-lock overlay.
+                cancelGeneration()
+                privateChatAccess.revokeAll()
+                voice.stopDictation()
+                voice.stopSpeaking()
+                // Do not dismiss the Safari consent screen or lock its host scene
+                // while an interactive ChatGPT OAuth transaction is in progress.
+                if !chatGPTSignIn.busy {
+                    appLock.lock()
+                    showSettings = false
+                    showSidebar = false
                 }
-                if let chat = selected, chat.branchedFrom != nil {
-                    HStack(spacing: 7) {
-                        Label(chat.branchMode.displayName, systemImage: "arrow.triangle.branch")
-                            .font(.caption)
-                        if let origin = chat.branchedFrom,
-                           store.conversations.contains(where: { $0.id == origin.parentConversationID }) {
-                            Button("Original chat") {
-                                store.selectedID = origin.parentConversationID
-                            }.font(.caption)
+            }
+        }
+    }
+
+
+    private var settingsAccountSection: some View {
+        Section("ChatGPT account") {
+                            if let session = chatGPTSignIn.session {
+                                Text(session.email ?? "Connected account")
+                                Text(session.canUsePlan ? "ChatGPT plan permission granted" : "Plan permission not granted")
+                                    .font(.footnote).foregroundColor(.secondary)
+                                if session.canUsePlan && AuthBillingChoice.route != .chatgptPlan {
+                                    Button("Use ChatGPT plan") {
+                                        // Switching billing routes must not destroy the other
+                                        // working account or discard its OAuth refresh token.
+                                        cancelGeneration()
+                                        AuthBillingChoice.select(.chatgptPlan)
+                                        modelOptions = []
+                                        fetchModels()
+                                    }
+                                }
+                                if hasAPIKey && AuthBillingChoice.route != .apiKey {
+                                    Button("Use my API key instead") {
+                                        cancelGeneration()
+                                        AuthBillingChoice.select(.apiKey)
+                                        modelOptions = []
+                                        fetchModels()
+                                    }
+                                }
+                                Text(AuthBillingChoice.route == .chatgptPlan
+                                     ? "Billing: ChatGPT plan (when authorized)"
+                                     : "Billing: your API key")
+                                    .font(.footnote).foregroundColor(.secondary)
+                                Button("Sign out locally") {
+                                    cancelGeneration()
+                                    chatGPTSignIn.signOut()
+                                }
+                                Button("Disconnect and revoke session", role: .destructive) {
+                                    cancelGeneration()
+                                    Task { await chatGPTSignIn.disconnect() }
+                                }.disabled(chatGPTSignIn.busy)
+                            }
+                            if chatGPTSignIn.session == nil || chatGPTSignIn.pendingAccountSwitch {
+                                Button(chatGPTSignIn.busy ? "Opening OpenAI sign-in…" : "Continue with ChatGPT") {
+                                    Task { await chatGPTSignIn.signIn() }
+                                }.disabled(chatGPTSignIn.busy)
+                            }
+                            if chatGPTSignIn.session == nil && hasAPIKey &&
+                               AuthBillingChoice.route == .chatgptPlan {
+                                Button("Use my API key instead") {
+                                    AuthBillingChoice.select(.apiKey)
+                                    modelOptions = []
+                                    fetchModels()
+                                }
+                                Text("This explicitly changes billing to your API account.")
+                                    .font(.footnote).foregroundColor(.secondary)
+                            }
+                            if chatGPTSignIn.busy {
+                                Text(chatGPTSignIn.phase)
+                                    .font(.footnote).foregroundColor(.secondary)
+                                Button("Cancel sign-in") { chatGPTSignIn.cancelSignIn() }
+                            }
+                            if chatGPTSignIn.session == nil || chatGPTSignIn.pendingAccountSwitch {
+                                ForEach(ChatGPTSessionVault.registrations()) { account in
+                                    Button("Reconnect: \(account.email ?? "Account …\(account.subject.suffix(6))")") {
+                                        chatGPTSignIn.selectSavedAccount(account)
+                                    }.disabled(chatGPTSignIn.busy)
+                                }
+                            }
+                            Button("Switch ChatGPT account") {
+                                cancelGeneration()
+                                chatGPTSignIn.switchAccount()
+                            }
+                                .disabled(chatGPTSignIn.busy)
+                            if let message = chatGPTSignIn.message {
+                                Text(message).font(.footnote).foregroundColor(.secondary)
+                            }
+                            Text("Unofficial open-source client. OpenAI's sign-in page handles Google and passkeys when available. iOS 16 loopback browser behavior remains unverified on a real device.")
+                                .font(.footnote).foregroundColor(.secondary)
                         }
-                        Button("Versions") { showBranchVersions = true }
-                            .font(.caption)
-                        Spacer()
+    }
+
+    private var settingsAPIKeySection: some View {
+        Section("API key fallback") {
+                            SecureField("OpenAI API key", text: $apiKeyInput)
+                                .textInputAutocapitalization(.never).autocorrectionDisabled()
+                            Button("Save API key to Keychain") {
+                                hasAPIKey = CredentialVault.saveAPIKey(apiKeyInput.trimmingCharacters(in: .whitespacesAndNewlines))
+                                // Typing an API key while signed out is an explicit
+                                // billing choice; merely saving a backup API key
+                                // while ChatGPT is connected does NOT switch routes.
+                                if hasAPIKey && chatGPTSignIn.session == nil {
+                                    AuthBillingChoice.select(.apiKey)
+                                }
+                                apiKeyInput = ""
+                            }
+                            Text(hasAPIKey ? "Key stored on device" : "No API key stored")
+                                .font(.footnote).foregroundColor(.secondary)
+                            Button("Remove API key", role: .destructive) {
+                                CredentialVault.deleteAPIKey(); hasAPIKey = false
+                            }
+                            Button("Select model: \(selectedModelLabel)") {
+                                showSettings = false
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                                    showModelPicker = true
+                                }
+                            }
+                            Text("API models are separate from ChatGPT app model choices.")
+                                .font(.footnote).foregroundColor(.secondary)
+                        }
+    }
+
+    private var settingsDiagnosticsSection: some View {
+        Section("Authentication diagnostics") {
+                            Button("Test local callback listener") {
+                                Task { await chatGPTSignIn.testLoopback() }
+                            }.disabled(chatGPTSignIn.busy)
+                            if let result = chatGPTSignIn.loopbackDiagnostic {
+                                Text(result).font(.footnote).textSelection(.enabled)
+                            }
+                            Text("A passing foreground callback test does not prove Google or passkey authentication works through Safari on iOS 16.")
+                                .font(.footnote).foregroundColor(.secondary)
+                        }
+    }
+
+    private var settingsSecuritySection: some View {
+        Section("Security") {
+                            if appLock.enabled {
+                                Button("Disable app lock") { appLock.enabled = false }
+                            } else {
+                                Button("Enable Touch ID / passcode app lock") {
+                                    Task { await appLock.enableAfterAuthentication() }
+                                }
+                            }
+                            Text("Local device authentication, not an OpenAI account passkey.")
+                                .font(.footnote).foregroundColor(.secondary)
+                        }
+    }
+
+    private var settingsPrivacySection: some View {
+        Section("Privacy") {
+                            Text("Long-press a conversation in Chats to pin, archive, or protect it with Touch ID/passcode. Locked chat contents are hidden from sidebar search.")
+                                .font(.footnote).foregroundColor(.secondary)
+                            Text("API requests use store=false. History is saved locally.")
+                                .font(.footnote)
+                            Button("Delete all local conversations", role: .destructive) { confirmDelete = true }
+                        }
+    }
+
+    private var settingsPortabilitySection: some View {
+        Section("Data portability") {
+                            Button(importingHistory ? "Importing history…" : "Import ChatGPT history (conversations.json)") {
+                                showHistoryImporter = true
+                            }.disabled(importingHistory)
+                            if let result = historyImportMessage {
+                                Text(result).font(.footnote).foregroundColor(.secondary)
+                            }
+                            Text("Import your own ChatGPT data export: unzip it in Files, then choose conversations.json. This is an offline import, not live account syncing.")
+                                .font(.footnote).foregroundColor(.secondary)
+                            Button("Export local conversations (JSON)") {
+                                Task {
+                                    // Do not leak private-chat content through data export
+                                    // merely because the device is already unlocked.
+                                    if store.conversations.contains(where: { $0.isLocked }) {
+                                        guard await privateChatAccess.authorizeSensitiveExport() else {
+                                            requestError = "Touch ID/passcode required to export protected chats."
+                                            return
+                                        }
+                                    }
+                                    guard let data = store.exportData() else { return }
+                                    let file = FileManager.default.temporaryDirectory
+                                        .appendingPathComponent("chatgpt-local-export-\(UUID().uuidString).json")
+                                    do {
+                                        try data.write(to: file, options: [.atomic, .completeFileProtectionUnlessOpen])
+                                        exportURL = file
+                                        showExport = true
+                                    } catch { requestError = "Unable to export conversations." }
+                                }
+                            }
+                            Text("Exported files contain your messages. Share only with trusted destinations.")
+                                .font(.footnote).foregroundColor(.secondary)
+                        }
+    }
+
+    private var settingsVoiceSection: some View {
+        Section("Voice") {
+                            Text("Dictation uses iOS Speech Recognition. Read-aloud uses Apple's system voices. These are not ChatGPT realtime voice sessions.")
+                                .font(.footnote).foregroundColor(.secondary)
+                        }
+    }
+
+
+    private var sidebarSheetContent: some View {
+                NavigationStack {
+                    List {
+                        Picker("View", selection: $sidebarFilter) {
+                            ForEach(ConversationListFilter.allCases) { filter in
+                                Text(filter.rawValue).tag(filter)
+                            }
+                        }.pickerStyle(.segmented)
+                        ForEach(sidebarChats) { chat in
+                            Button { store.selectedID = chat.id; showSidebar = false } label: {
+                                HStack(spacing: 9) {
+                                    if chat.isPinned { Image(systemName: "pin.fill") }
+                                    if chat.isLocked && !privateChatAccess.canRead(chat.id) {
+                                        Image(systemName: "lock.fill")
+                                        Text("Locked conversation").lineLimit(1)
+                                    } else {
+                                        Text(chat.title).lineLimit(1)
+                                    }
+                                    if chat.isTemporary { Image(systemName: "eye.slash") }
+                                    if chat.branchedFrom != nil {
+                                        Image(systemName: "arrow.triangle.branch")
+                                    }
+                                    Spacer(minLength: 0)
+                                }
+                            }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button("Delete", role: .destructive) {
+                                    privateChatAccess.revoke(chat.id)
+                                    store.delete(chat.id)
+                                }
+                                Button(chat.isArchived ? "Restore" : "Archive") {
+                                    store.setArchived(chat.id, !chat.isArchived)
+                                }.tint(.orange)
+                            }
+                            .contextMenu {
+                                Button(chat.isPinned ? "Unpin" : "Pin") {
+                                    store.setPinned(chat.id, !chat.isPinned)
+                                }
+                                Button(chat.isArchived ? "Restore" : "Archive") {
+                                    store.setArchived(chat.id, !chat.isArchived)
+                                }
+                                Button(chat.isLocked ? "Remove local lock" : "Lock this chat") {
+                                    Task {
+                                        // Require Touch ID/passcode even to disable an existing lock.
+                                        if await privateChatAccess.authenticate(chat.id) {
+                                            store.setLocked(chat.id, !chat.isLocked)
+                                            // Lock immediately; never leave this chat open after enabling.
+                                            privateChatAccess.revoke(chat.id)
+                                        }
+                                    }
+                                }
+                                if !chat.isLocked || privateChatAccess.canRead(chat.id) {
+                                    Button("Rename") { renamingChat = chat; renameText = chat.title }
+                                }
+                            }
+                        }
                     }
-                    .padding(.horizontal, 14).padding(.vertical, 4)
-                    .foregroundColor(.secondary)
+                    .searchable(text: $search)
+                    .onChange(of: search) { term in
+                        // Avoid assembling/searching thousands of imported
+                        // conversations for *every keystroke* on old devices.
+                        sidebarSearchTask?.cancel()
+                        if term.isEmpty { appliedSearch = ""; return }
+                        sidebarSearchTask = Task {
+                            try? await Task.sleep(nanoseconds: 220_000_000)
+                            guard !Task.isCancelled else { return }
+                            appliedSearch = term
+                        }
+                    }.navigationTitle("Chats")
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Done") { showSidebar = false }
+                        }
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button {
+                                // Avoid presenting Settings on top of the already
+                                // presented Chats sheet (unreliable on iOS 16).
+                                showSidebar = false
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                                    showSettings = true
+                                }
+                            } label: { Image(systemName: "gearshape") }
+                        }
+                    }
                 }
-                ScrollViewReader { proxy in
+            
+    }
+
+
+    private var settingsSheetContent: some View {
+                NavigationStack {
+                    Form {
+                        settingsAccountSection
+                        settingsAPIKeySection
+                        settingsDiagnosticsSection
+                        if let notice = store.startupRecoveryNotice {
+                            Section("Saved-history recovery") {
+                                Text(notice)
+                                    .font(.footnote)
+                                    .textSelection(.enabled)
+                                if let recoveryFile = store.recoveryFileURL {
+                                    Button("Export preserved original file") {
+                                        Task {
+                                            guard await privateChatAccess.authorizeSensitiveExport() else {
+                                                requestError = "Device authentication required to export recovered history."
+                                                return
+                                            }
+                                            guard FileManager.default.fileExists(atPath: recoveryFile.path) else {
+                                                requestError = "Preserved history file could not be found."
+                                                return
+                                            }
+                                            exportURL = recoveryFile
+                                            showExport = true
+                                        }
+                                    }
+                                }
+                                Text("The app will not silently overwrite unreadable history. Keep the preserved file until you verify recovery.")
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        settingsSecuritySection
+                        settingsPrivacySection
+                        settingsPortabilitySection
+                        settingsVoiceSection
+                        Section("About") { Text("Native iOS 16 Reconstruction · Stabilization V22") }
+                    }
+                    .navigationTitle("Settings")
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Done") { showSettings = false }
+                        }
+                    }
+                    .confirmationDialog("Delete all local conversations?", isPresented: $confirmDelete) {
+                        Button("Delete all", role: .destructive) {
+                            cancelGeneration()
+                            store.deleteAll()
+                        }
+                    }
+            .fileImporter(isPresented: $showHistoryImporter,
+                          allowedContentTypes: [.json]) { result in
+                do {
+                    let url = try result.get()
+                    importingHistory = true
+                    historyImportMessage = "Reading your export…"
+                    Task {
+                        do {
+                            // 64 MB JSON may take seconds to parse. Avoid
+                            // blocking the sidebar/composer and animation loop.
+                            let parsed = try await Task.detached(priority: .utility) {
+                                let scoped = url.startAccessingSecurityScopedResource()
+                                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+                                let bytes = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+                                guard bytes <= ChatGPTHistoryImporter.maxBytes else {
+                                    throw HistoryImportError.tooLarge
+                                }
+                                let data = try Data(contentsOf: url, options: .mappedIfSafe)
+                                return try ChatGPTHistoryImporter.parse(data)
+                            }.value
+                            let added = store.mergeChatGPTExport(parsed)
+                            historyImportMessage = "Imported \(added) conversations (\(parsed.count - added) already imported)."
+                        } catch {
+                            historyImportMessage = "Could not import history: \(error.localizedDescription)"
+                        }
+                        importingHistory = false
+                    }
+                } catch {
+                    historyImportMessage = "Could not import history: \(error.localizedDescription)"
+                }
+            }
+            .sheet(isPresented: $showExport, onDismiss: {
+                if let url = exportURL, url != store.recoveryFileURL {
+                    try? FileManager.default.removeItem(at: url)
+                }
+                exportURL = nil
+            }) {
+                if let url = exportURL { ActivityShareSheet(items: [url]) }
+            }
+                }
+            
+    }
+
+
+    private var modelPickerContent: some View {
+            NavigationStack {
+                List {
+                    Section("Current model") {
+                        Text(selectedModelLabel).font(.headline)
+                        Text(selectedModelID).font(.caption).foregroundColor(.secondary)
+                        Text("Model selection is independent of temporary chat, image, and web-search switches. The server still enforces model and tool access.")
+                            .font(.footnote).foregroundColor(.secondary)
+                    }
+                    Section(header: Text(AuthBillingChoice.route == .chatgptPlan
+                                         ? "Models returned for your ChatGPT account"
+                                         : "Models returned for your API key")) {
+                        if loadingModels { ProgressView("Fetching models…") }
+                        if !modelOptions.isEmpty && !modelOptions.contains(where: { $0.id == selectedModelID }) {
+                            Text("Your current selection is not in this account's returned model catalog. It remains selected until you change it; requests may be rejected by the server.")
+                                .font(.footnote).foregroundColor(.secondary)
+                        }
+                        if let error = modelLoadError {
+                            Text(error).font(.footnote).foregroundColor(.secondary)
+                        }
+                        ForEach(ModelCatalog.filtered(modelOptions, query: modelSearch,
+                                                      showOther: showOtherReturnedModels)) { choice in
+                            Button {
+                                chooseModel(choice.id)
+                                showModelPicker = false
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(choice.displayName)
+                                        if choice.displayName != choice.id {
+                                            Text(choice.id).font(.caption).foregroundColor(.secondary)
+                                        }
+                                    }
+                                    Spacer()
+                                    if !choice.isListed {
+                                        Text("Other").font(.caption2).foregroundColor(.secondary)
+                                    }
+                                    if choice.id == selectedModelID { Image(systemName: "checkmark") }
+                                }
+                            }
+                        }
+                    }
+                    Section("Advanced") {
+                        Toggle("Show other models returned by server", isOn: $showOtherReturnedModels)
+                        Text("Some returned models are not listed for normal display and might be unsupported. This toggle only changes what you see, not what your account is authorized to use.")
+                            .font(.footnote).foregroundColor(.secondary)
+                        NavigationLink("Enter a model ID manually") {
+                            ManualModelEntry(current: selectedModelID) { chosen in
+                                chooseModel(chosen)
+                                showModelPicker = false
+                            }
+                        }
+                    }
+                    Section {
+                        Text("The model list is a catalog, not an entitlement check. Server-side availability and tool compatibility still apply; your selection will not be silently replaced.")
+                            .font(.footnote).foregroundColor(.secondary)
+                    }
+                }
+                .searchable(text: $modelSearch)
+                .navigationTitle("Choose model")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Refresh") { fetchModels() }
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Done") { showModelPicker = false }
+                    }
+                }
+                .onAppear { if modelOptions.isEmpty { fetchModels() } }
+            }
+        
+    }
+
+    private var transcriptScrollView: some View {
+        ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 16) {
                             if selected?.messages.isEmpty != false {
@@ -240,24 +714,10 @@ struct RootView: View {
                         }
                     }
                 }
-                if importingDocument {
-                    HStack(spacing: 8) {
-                        ProgressView().controlSize(.small)
-                        Text("Reading attachment…").font(.caption).foregroundColor(.secondary)
-                        Spacer()
-                    }.padding(.horizontal, 18).padding(.bottom, 3)
-                }
-                if activeTask != nil {
-                    HStack(spacing: 8) {
-                        ProgressView().controlSize(.small)
-                        Text(generationStatus ?? "Waiting for response…")
-                            .font(.caption).foregroundColor(.secondary)
-                        Spacer()
-                    }
-                    .padding(.horizontal, 18).padding(.bottom, 3)
-                    .accessibilityElement(children: .combine)
-                }
-                ChatComposerView(
+    }
+
+    private var chatComposer: some View {
+        ChatComposerView(
                     input: $input,
                     selectedPhoto: $selectedPhoto,
                     webSearch: $useWebSearch,
@@ -296,7 +756,88 @@ struct RootView: View {
                         store.saveDraft(newText, in: id)
                     }
                 }
+    }
+
+    private var mainChatColumn: some View {
+        VStack(spacing: 0) {
+                if store.startupRecoveryNotice != nil {
+                    HStack(spacing: 8) {
+                        Image(systemName: "externaldrive.badge.exclamationmark")
+                        Text("Saved history needs recovery")
+                            .font(.caption)
+                        Spacer()
+                        Button("Details") { showSettings = true }
+                            .font(.caption.weight(.semibold))
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .accessibilityElement(children: .combine)
+                }
+                ModelAndUsageBar(
+                    modelName: selectedModelLabel,
+                    isChatGPTPlan: isChatGPTPlan,
+                    lastUsage: selected?.lastUsage,
+                    lastRateLimits: selected?.lastRateLimits,
+                    onModel: { showModelPicker = true },
+                    onBranch: { openBranchFromHere(messageID: nil) },
+                    onUsage: { showUsage = true }
+                )
+                if let chat = selected,
+                   chat.branchedFrom == nil,
+                   store.conversations.contains(where: {
+                       $0.branchedFrom?.parentConversationID == chat.id
+                   }) {
+                    HStack {
+                        Label("This chat has alternate branches", systemImage: "arrow.triangle.branch")
+                            .font(.caption)
+                        Spacer()
+                        Button("View branches") { showBranchVersions = true }
+                            .font(.caption)
+                    }
+                    .padding(.horizontal, 14).padding(.vertical, 4)
+                    .foregroundColor(.secondary)
+                }
+                if let chat = selected, chat.branchedFrom != nil {
+                    HStack(spacing: 7) {
+                        Label(chat.branchMode.displayName, systemImage: "arrow.triangle.branch")
+                            .font(.caption)
+                        if let origin = chat.branchedFrom,
+                           store.conversations.contains(where: { $0.id == origin.parentConversationID }) {
+                            Button("Original chat") {
+                                store.selectedID = origin.parentConversationID
+                            }.font(.caption)
+                        }
+                        Button("Versions") { showBranchVersions = true }
+                            .font(.caption)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 14).padding(.vertical, 4)
+                    .foregroundColor(.secondary)
+                }
+                transcriptScrollView
+                if importingDocument {
+                    HStack(spacing: 8) {
+                        ProgressView().controlSize(.small)
+                        Text("Reading attachment…").font(.caption).foregroundColor(.secondary)
+                        Spacer()
+                    }.padding(.horizontal, 18).padding(.bottom, 3)
+                }
+                if activeTask != nil {
+                    HStack(spacing: 8) {
+                        ProgressView().controlSize(.small)
+                        Text(generationStatus ?? "Waiting for response…")
+                            .font(.caption).foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 18).padding(.bottom, 3)
+                    .accessibilityElement(children: .combine)
+                }
+                chatComposer
             }
+    }
+
+    private var mainChatWithHandlers: some View {
+        mainChatColumn
             .sheet(isPresented: $showCamera) {
                 CameraPicker { data in
                     if let data = data { attachedImage = data }
@@ -386,6 +927,11 @@ struct RootView: View {
             .onChange(of: voice.errorMessage) { error in
                 if let error = error { requestError = error; voice.errorMessage = nil }
             }
+    }
+
+    private var navigationContent: some View {
+        NavigationStack {
+            mainChatWithHandlers
             .navigationTitle(selected?.isTemporary == true ? "Temporary chat" : "ChatGPT")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -413,90 +959,7 @@ struct RootView: View {
                     Button("OK", role: .cancel) { requestError = nil; lastBackendIssue = nil }
                 } message: { Text(requestError ?? "") }
             .sheet(isPresented: $showSidebar) {
-                NavigationStack {
-                    List {
-                        Picker("View", selection: $sidebarFilter) {
-                            ForEach(ConversationListFilter.allCases) { filter in
-                                Text(filter.rawValue).tag(filter)
-                            }
-                        }.pickerStyle(.segmented)
-                        ForEach(sidebarChats) { chat in
-                            Button { store.selectedID = chat.id; showSidebar = false } label: {
-                                HStack(spacing: 9) {
-                                    if chat.isPinned { Image(systemName: "pin.fill") }
-                                    if chat.isLocked && !privateChatAccess.canRead(chat.id) {
-                                        Image(systemName: "lock.fill")
-                                        Text("Locked conversation").lineLimit(1)
-                                    } else {
-                                        Text(chat.title).lineLimit(1)
-                                    }
-                                    if chat.isTemporary { Image(systemName: "eye.slash") }
-                                    if chat.branchedFrom != nil {
-                                        Image(systemName: "arrow.triangle.branch")
-                                    }
-                                    Spacer(minLength: 0)
-                                }
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button("Delete", role: .destructive) {
-                                    privateChatAccess.revoke(chat.id)
-                                    store.delete(chat.id)
-                                }
-                                Button(chat.isArchived ? "Restore" : "Archive") {
-                                    store.setArchived(chat.id, !chat.isArchived)
-                                }.tint(.orange)
-                            }
-                            .contextMenu {
-                                Button(chat.isPinned ? "Unpin" : "Pin") {
-                                    store.setPinned(chat.id, !chat.isPinned)
-                                }
-                                Button(chat.isArchived ? "Restore" : "Archive") {
-                                    store.setArchived(chat.id, !chat.isArchived)
-                                }
-                                Button(chat.isLocked ? "Remove local lock" : "Lock this chat") {
-                                    Task {
-                                        // Require Touch ID/passcode even to disable an existing lock.
-                                        if await privateChatAccess.authenticate(chat.id) {
-                                            store.setLocked(chat.id, !chat.isLocked)
-                                            // Lock immediately; never leave this chat open after enabling.
-                                            privateChatAccess.revoke(chat.id)
-                                        }
-                                    }
-                                }
-                                if !chat.isLocked || privateChatAccess.canRead(chat.id) {
-                                    Button("Rename") { renamingChat = chat; renameText = chat.title }
-                                }
-                            }
-                        }
-                    }
-                    .searchable(text: $search)
-                    .onChange(of: search) { term in
-                        // Avoid assembling/searching thousands of imported
-                        // conversations for *every keystroke* on old devices.
-                        sidebarSearchTask?.cancel()
-                        if term.isEmpty { appliedSearch = ""; return }
-                        sidebarSearchTask = Task {
-                            try? await Task.sleep(nanoseconds: 220_000_000)
-                            guard !Task.isCancelled else { return }
-                            appliedSearch = term
-                        }
-                    }.navigationTitle("Chats")
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Button("Done") { showSidebar = false }
-                        }
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            Button {
-                                // Avoid presenting Settings on top of the already
-                                // presented Chats sheet (unreliable on iOS 16).
-                                showSidebar = false
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                                    showSettings = true
-                                }
-                            } label: { Image(systemName: "gearshape") }
-                        }
-                    }
-                }
+                sidebarSheetContent
             }
             .sheet(isPresented: $showShareText) {
                 if let shareText = shareText { ActivityShareSheet(items: [shareText]) }
@@ -528,255 +991,14 @@ struct RootView: View {
                 )
             }
             .sheet(isPresented: $showSettings) {
-                NavigationStack {
-                    Form {
-                        Section("ChatGPT account") {
-                            if let session = chatGPTSignIn.session {
-                                Text(session.email ?? "Connected account")
-                                Text(session.canUsePlan ? "ChatGPT plan permission granted" : "Plan permission not granted")
-                                    .font(.footnote).foregroundColor(.secondary)
-                                if session.canUsePlan && AuthBillingChoice.route != .chatgptPlan {
-                                    Button("Use ChatGPT plan") {
-                                        // Switching billing routes must not destroy the other
-                                        // working account or discard its OAuth refresh token.
-                                        cancelGeneration()
-                                        AuthBillingChoice.select(.chatgptPlan)
-                                        modelOptions = []
-                                        fetchModels()
-                                    }
-                                }
-                                if hasAPIKey && AuthBillingChoice.route != .apiKey {
-                                    Button("Use my API key instead") {
-                                        cancelGeneration()
-                                        AuthBillingChoice.select(.apiKey)
-                                        modelOptions = []
-                                        fetchModels()
-                                    }
-                                }
-                                Text(AuthBillingChoice.route == .chatgptPlan
-                                     ? "Billing: ChatGPT plan (when authorized)"
-                                     : "Billing: your API key")
-                                    .font(.footnote).foregroundColor(.secondary)
-                                Button("Sign out locally") {
-                                    cancelGeneration()
-                                    chatGPTSignIn.signOut()
-                                }
-                                Button("Disconnect and revoke session", role: .destructive) {
-                                    cancelGeneration()
-                                    Task { await chatGPTSignIn.disconnect() }
-                                }.disabled(chatGPTSignIn.busy)
-                            }
-                            if chatGPTSignIn.session == nil || chatGPTSignIn.pendingAccountSwitch {
-                                Button(chatGPTSignIn.busy ? "Opening OpenAI sign-in…" : "Continue with ChatGPT") {
-                                    Task { await chatGPTSignIn.signIn() }
-                                }.disabled(chatGPTSignIn.busy)
-                            }
-                            if chatGPTSignIn.session == nil && hasAPIKey &&
-                               AuthBillingChoice.route == .chatgptPlan {
-                                Button("Use my API key instead") {
-                                    AuthBillingChoice.select(.apiKey)
-                                    modelOptions = []
-                                    fetchModels()
-                                }
-                                Text("This explicitly changes billing to your API account.")
-                                    .font(.footnote).foregroundColor(.secondary)
-                            }
-                            if chatGPTSignIn.busy {
-                                Text(chatGPTSignIn.phase)
-                                    .font(.footnote).foregroundColor(.secondary)
-                                Button("Cancel sign-in") { chatGPTSignIn.cancelSignIn() }
-                            }
-                            if chatGPTSignIn.session == nil || chatGPTSignIn.pendingAccountSwitch {
-                                ForEach(ChatGPTSessionVault.registrations()) { account in
-                                    Button("Reconnect: \(account.email ?? "Account …\(account.subject.suffix(6))")") {
-                                        chatGPTSignIn.selectSavedAccount(account)
-                                    }.disabled(chatGPTSignIn.busy)
-                                }
-                            }
-                            Button("Switch ChatGPT account") {
-                                cancelGeneration()
-                                chatGPTSignIn.switchAccount()
-                            }
-                                .disabled(chatGPTSignIn.busy)
-                            if let message = chatGPTSignIn.message {
-                                Text(message).font(.footnote).foregroundColor(.secondary)
-                            }
-                            Text("Unofficial open-source client. OpenAI's sign-in page handles Google and passkeys when available. iOS 16 loopback browser behavior remains unverified on a real device.")
-                                .font(.footnote).foregroundColor(.secondary)
-                        }
-                        Section("API key fallback") {
-                            SecureField("OpenAI API key", text: $apiKeyInput)
-                                .textInputAutocapitalization(.never).autocorrectionDisabled()
-                            Button("Save API key to Keychain") {
-                                hasAPIKey = CredentialVault.saveAPIKey(apiKeyInput.trimmingCharacters(in: .whitespacesAndNewlines))
-                                // Typing an API key while signed out is an explicit
-                                // billing choice; merely saving a backup API key
-                                // while ChatGPT is connected does NOT switch routes.
-                                if hasAPIKey && chatGPTSignIn.session == nil {
-                                    AuthBillingChoice.select(.apiKey)
-                                }
-                                apiKeyInput = ""
-                            }
-                            Text(hasAPIKey ? "Key stored on device" : "No API key stored")
-                                .font(.footnote).foregroundColor(.secondary)
-                            Button("Remove API key", role: .destructive) {
-                                CredentialVault.deleteAPIKey(); hasAPIKey = false
-                            }
-                            Button("Select model: \(selectedModelLabel)") {
-                                showSettings = false
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                                    showModelPicker = true
-                                }
-                            }
-                            Text("API models are separate from ChatGPT app model choices.")
-                                .font(.footnote).foregroundColor(.secondary)
-                        }
-                        Section("Authentication diagnostics") {
-                            Button("Test local callback listener") {
-                                Task { await chatGPTSignIn.testLoopback() }
-                            }.disabled(chatGPTSignIn.busy)
-                            if let result = chatGPTSignIn.loopbackDiagnostic {
-                                Text(result).font(.footnote).textSelection(.enabled)
-                            }
-                            Text("A passing foreground callback test does not prove Google or passkey authentication works through Safari on iOS 16.")
-                                .font(.footnote).foregroundColor(.secondary)
-                        }
-                        if let notice = store.startupRecoveryNotice {
-                            Section("Saved-history recovery") {
-                                Text(notice)
-                                    .font(.footnote)
-                                    .textSelection(.enabled)
-                                if let recoveryFile = store.recoveryFileURL {
-                                    Button("Export preserved original file") {
-                                        Task {
-                                            guard await privateChatAccess.authorizeSensitiveExport() else {
-                                                requestError = "Device authentication required to export recovered history."
-                                                return
-                                            }
-                                            guard FileManager.default.fileExists(atPath: recoveryFile.path) else {
-                                                requestError = "Preserved history file could not be found."
-                                                return
-                                            }
-                                            exportURL = recoveryFile
-                                            showExport = true
-                                        }
-                                    }
-                                }
-                                Text("The app will not silently overwrite unreadable history. Keep the preserved file until you verify recovery.")
-                                    .font(.footnote)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        Section("Security") {
-                            if appLock.enabled {
-                                Button("Disable app lock") { appLock.enabled = false }
-                            } else {
-                                Button("Enable Touch ID / passcode app lock") {
-                                    Task { await appLock.enableAfterAuthentication() }
-                                }
-                            }
-                            Text("Local device authentication, not an OpenAI account passkey.")
-                                .font(.footnote).foregroundColor(.secondary)
-                        }
-                        Section("Privacy") {
-                            Text("Long-press a conversation in Chats to pin, archive, or protect it with Touch ID/passcode. Locked chat contents are hidden from sidebar search.")
-                                .font(.footnote).foregroundColor(.secondary)
-                            Text("API requests use store=false. History is saved locally.")
-                                .font(.footnote)
-                            Button("Delete all local conversations", role: .destructive) { confirmDelete = true }
-                        }
-                        Section("Data portability") {
-                            Button(importingHistory ? "Importing history…" : "Import ChatGPT history (conversations.json)") {
-                                showHistoryImporter = true
-                            }.disabled(importingHistory)
-                            if let result = historyImportMessage {
-                                Text(result).font(.footnote).foregroundColor(.secondary)
-                            }
-                            Text("Import your own ChatGPT data export: unzip it in Files, then choose conversations.json. This is an offline import, not live account syncing.")
-                                .font(.footnote).foregroundColor(.secondary)
-                            Button("Export local conversations (JSON)") {
-                                Task {
-                                    // Do not leak private-chat content through data export
-                                    // merely because the device is already unlocked.
-                                    if store.conversations.contains(where: { $0.isLocked }) {
-                                        guard await privateChatAccess.authorizeSensitiveExport() else {
-                                            requestError = "Touch ID/passcode required to export protected chats."
-                                            return
-                                        }
-                                    }
-                                    guard let data = store.exportData() else { return }
-                                    let file = FileManager.default.temporaryDirectory
-                                        .appendingPathComponent("chatgpt-local-export-\(UUID().uuidString).json")
-                                    do {
-                                        try data.write(to: file, options: [.atomic, .completeFileProtectionUnlessOpen])
-                                        exportURL = file
-                                        showExport = true
-                                    } catch { requestError = "Unable to export conversations." }
-                                }
-                            }
-                            Text("Exported files contain your messages. Share only with trusted destinations.")
-                                .font(.footnote).foregroundColor(.secondary)
-                        }
-                        Section("Voice") {
-                            Text("Dictation uses iOS Speech Recognition. Read-aloud uses Apple's system voices. These are not ChatGPT realtime voice sessions.")
-                                .font(.footnote).foregroundColor(.secondary)
-                        }
-                        Section("About") { Text("Native iOS 16 Reconstruction · Stabilization V22") }
-                    }
-                    .navigationTitle("Settings")
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Button("Done") { showSettings = false }
-                        }
-                    }
-                    .confirmationDialog("Delete all local conversations?", isPresented: $confirmDelete) {
-                        Button("Delete all", role: .destructive) {
-                            cancelGeneration()
-                            store.deleteAll()
-                        }
-                    }
-            .fileImporter(isPresented: $showHistoryImporter,
-                          allowedContentTypes: [.json]) { result in
-                do {
-                    let url = try result.get()
-                    importingHistory = true
-                    historyImportMessage = "Reading your export…"
-                    Task {
-                        do {
-                            // 64 MB JSON may take seconds to parse. Avoid
-                            // blocking the sidebar/composer and animation loop.
-                            let parsed = try await Task.detached(priority: .utility) {
-                                let scoped = url.startAccessingSecurityScopedResource()
-                                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-                                let bytes = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
-                                guard bytes <= ChatGPTHistoryImporter.maxBytes else {
-                                    throw HistoryImportError.tooLarge
-                                }
-                                let data = try Data(contentsOf: url, options: .mappedIfSafe)
-                                return try ChatGPTHistoryImporter.parse(data)
-                            }.value
-                            let added = store.mergeChatGPTExport(parsed)
-                            historyImportMessage = "Imported \(added) conversations (\(parsed.count - added) already imported)."
-                        } catch {
-                            historyImportMessage = "Could not import history: \(error.localizedDescription)"
-                        }
-                        importingHistory = false
-                    }
-                } catch {
-                    historyImportMessage = "Could not import history: \(error.localizedDescription)"
-                }
-            }
-            .sheet(isPresented: $showExport, onDismiss: {
-                if let url = exportURL, url != store.recoveryFileURL {
-                    try? FileManager.default.removeItem(at: url)
-                }
-                exportURL = nil
-            }) {
-                if let url = exportURL { ActivityShareSheet(items: [url]) }
-            }
-                }
+                settingsSheetContent
             }
         }
+    }
+
+    private var rootOverlays: some View {
+        ZStack {
+        navigationContent
         if privacyShieldActive {
             Color(.systemBackground).ignoresSafeArea()
             VStack(spacing: 12) {
@@ -817,157 +1039,6 @@ struct RootView: View {
                 }
             }
         }
-        }
-        .sheet(isPresented: $showUsage) {
-            UsageInfoSheet(
-                isChatGPTPlan: isChatGPTPlan,
-                lastUsage: selected?.lastUsage,
-                lastRateLimits: selected?.lastRateLimits)
-        }
-        .sheet(isPresented: $showBranchVersions) {
-            BranchVersionsSheet(
-                currentID: store.selectedID,
-                conversations: store.conversations,
-                onChoose: { id in
-                    // Conversation switch retains per-chat drafts via the existing
-                    // onChange handler. Never alter the parent or branch messages.
-                    store.selectedID = id
-                    showBranchVersions = false
-                },
-                onClose: { showBranchVersions = false }
-            )
-        }
-        .sheet(item: $branchContext) { context in
-            BranchCreateSheet(context: context, models: modelOptions,
-                              onCreate: { mode, chosenModel, effort, temporary in
-                guard store.branch(from: context.conversationID, at: context.messageID,
-                                   mode: mode, modelID: chosenModel,
-                                   reasoning: effort, temporary: temporary) != nil else {
-                    requestError = "The selected message is no longer available."
-                    branchContext = nil
-                    return
-                }
-                branchContext = nil
-                followLatest = true
-            }, onCancel: { branchContext = nil })
-        }
-        .sheet(isPresented: $showModelPicker) {
-            NavigationStack {
-                List {
-                    Section("Current model") {
-                        Text(selectedModelLabel).font(.headline)
-                        Text(selectedModelID).font(.caption).foregroundColor(.secondary)
-                        Text("Model selection is independent of temporary chat, image, and web-search switches. The server still enforces model and tool access.")
-                            .font(.footnote).foregroundColor(.secondary)
-                    }
-                    Section(header: Text(AuthBillingChoice.route == .chatgptPlan
-                                         ? "Models returned for your ChatGPT account"
-                                         : "Models returned for your API key")) {
-                        if loadingModels { ProgressView("Fetching models…") }
-                        if !modelOptions.isEmpty && !modelOptions.contains(where: { $0.id == selectedModelID }) {
-                            Text("Your current selection is not in this account's returned model catalog. It remains selected until you change it; requests may be rejected by the server.")
-                                .font(.footnote).foregroundColor(.secondary)
-                        }
-                        if let error = modelLoadError {
-                            Text(error).font(.footnote).foregroundColor(.secondary)
-                        }
-                        ForEach(ModelCatalog.filtered(modelOptions, query: modelSearch,
-                                                      showOther: showOtherReturnedModels)) { choice in
-                            Button {
-                                chooseModel(choice.id)
-                                showModelPicker = false
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(choice.displayName)
-                                        if choice.displayName != choice.id {
-                                            Text(choice.id).font(.caption).foregroundColor(.secondary)
-                                        }
-                                    }
-                                    Spacer()
-                                    if !choice.isListed {
-                                        Text("Other").font(.caption2).foregroundColor(.secondary)
-                                    }
-                                    if choice.id == selectedModelID { Image(systemName: "checkmark") }
-                                }
-                            }
-                        }
-                    }
-                    Section("Advanced") {
-                        Toggle("Show other models returned by server", isOn: $showOtherReturnedModels)
-                        Text("Some returned models are not listed for normal display and might be unsupported. This toggle only changes what you see, not what your account is authorized to use.")
-                            .font(.footnote).foregroundColor(.secondary)
-                        NavigationLink("Enter a model ID manually") {
-                            ManualModelEntry(current: selectedModelID) { chosen in
-                                chooseModel(chosen)
-                                showModelPicker = false
-                            }
-                        }
-                    }
-                    Section {
-                        Text("The model list is a catalog, not an entitlement check. Server-side availability and tool compatibility still apply; your selection will not be silently replaced.")
-                            .font(.footnote).foregroundColor(.secondary)
-                    }
-                }
-                .searchable(text: $modelSearch)
-                .navigationTitle("Choose model")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Refresh") { fetchModels() }
-                    }
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Done") { showModelPicker = false }
-                    }
-                }
-                .onAppear { if modelOptions.isEmpty { fetchModels() } }
-            }
-        }
-        .onChange(of: chatGPTSignIn.session?.clientID) { _ in
-            modelOptions = []
-            modelLoadError = nil
-            // New accounts must not reuse a previous account's model catalog.
-            // Invalidate any in-flight fetch even if login is still busy.
-            modelFetchID = UUID()
-            if !chatGPTSignIn.busy { fetchModels() }
-        }
-        .onChange(of: chatGPTSignIn.busy) { busy in
-            // Account commit occurs while the login Task still owns busy=true.
-            // Load models once the account transaction completes.
-            if !busy && chatGPTSignIn.session?.canUsePlan == true {
-                fetchModels()
-            }
-        }
-        .onChange(of: scenePhase) { phase in
-            if phase == .active {
-                privacyShieldActive = false
-                restoringDraft = true
-                input = lockedSelection == nil ? store.draft(for: store.selectedID) : ""
-                DispatchQueue.main.async { restoringDraft = false }
-            }
-            if phase != .active {
-                // Clear decrypted thumbnails/parsed message content on app switch.
-                ThumbnailCache.clear()
-                MarkdownRenderCache.clear()
-                if !chatGPTSignIn.busy { privacyShieldActive = true }
-                // Commit the current draft before hiding it. Wiping the composer
-                // without this save would lose text on permission dialogs/switching.
-                draftSaveTask?.cancel()
-                if let chat = selected { store.saveDraft(input, in: chat.id) }
-                restoringDraft = true
-                input = ""
-                // Prevent a response from appearing behind the app-lock overlay.
-                cancelGeneration()
-                privateChatAccess.revokeAll()
-                voice.stopDictation()
-                voice.stopSpeaking()
-                // Do not dismiss the Safari consent screen or lock its host scene
-                // while an interactive ChatGPT OAuth transaction is in progress.
-                if !chatGPTSignIn.busy {
-                    appLock.lock()
-                    showSettings = false
-                    showSidebar = false
-                }
-            }
         }
     }
 

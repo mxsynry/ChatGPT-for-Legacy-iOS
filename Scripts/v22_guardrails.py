@@ -32,8 +32,21 @@ assert 'Saved-history recovery' in view
 assert 'authorizeSensitiveExport()' in view
 assert 'if let url = exportURL, url != store.recoveryFileURL' in view
 assert 'showSettings' in view
-assert view.index('.sheet(isPresented: $showSettings)') < view.index('.fileImporter(isPresented: $showHistoryImporter')
-assert view.index('.sheet(isPresented: $showSettings)') < view.index('.sheet(isPresented: $showExport')
+# Presentation scope must remain inside Settings, but moving views into
+# computed properties changes their lexical order within RootView.swift.
+# Checking mere string position incorrectly rejects that valid refactor.
+assert '.sheet(isPresented: $showSettings)' in view
+assert 'private var settingsSheetContent: some View' in view
+settings_scope = view.split('private var settingsSheetContent: some View {', 1)[1].split('private var modelPickerContent: some View {', 1)[0]
+assert '.fileImporter(isPresented: $showHistoryImporter' in settings_scope
+assert '.sheet(isPresented: $showExport' in settings_scope
+# Guard against one huge SwiftUI body forcing Apple's constraint solver to time out.
+root_body = view.split('var body: some View {', 1)[1].split('private var settingsAccountSection: some View', 1)[0]
+assert root_body.count('\n') < 110, 'RootView.body grew into a monolithic expression again'
+for part in ('navigationContent', 'mainChatWithHandlers', 'transcriptScrollView',
+             'chatComposer', 'settingsSheetContent', 'sidebarSheetContent',
+             'modelPickerContent', 'mainChatColumn'):
+    assert 'private var ' + part + ': some View' in view, 'Missing isolated UI component: ' + part
 
 project = (root / 'project.yml').read_text()
 assert "IPHONEOS_DEPLOYMENT_TARGET: '16.0'" in project
