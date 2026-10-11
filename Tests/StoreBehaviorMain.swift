@@ -9,7 +9,7 @@ import Foundation
         let fileURL = dir.appendingPathComponent("conversations.json")
         let store = ConversationStore(storageURL: fileURL)
         func check(_ condition: @autoclosure () -> Bool, _ reason: String) {
-            if !condition() { fatalError("Stage21 store test failed: \(reason)") }
+            if !condition() { fatalError("V22 recovery/store test failed: \(reason)") }
         }
         check(store.conversations.count == 1, "fresh store starts with one chat")
         let id = store.selectedID!
@@ -64,8 +64,35 @@ import Foundation
         check(freshBytes != corruptBytes,
               "new history is stored separately from original")
         let afterRestart = ConversationStore(storageURL: corruptURL)
-        check(afterRestart.recoveryFileURL == recoveryURL,
-              "preserved history remains discoverable after restart")
+        // Verify actual recovered content, not ambiguous URL-object equality.
+        guard let foundRecoveryURL = afterRestart.recoveryFileURL else {
+            let names = (try? FileManager.default.contentsOfDirectory(atPath: dir.path)) ?? []
+            fatalError("Recovery missing on restart: expected=" +
+                       recoveryURL.lastPathComponent +
+                       "; directory=" + names.sorted().joined(separator: ", "))
+        }
+        check(foundRecoveryURL.lastPathComponent == recoveryURL.lastPathComponent,
+              "restart locates the same recovered history filename")
+        let rediscoveredBytes = try Data(contentsOf: foundRecoveryURL)
+        check(rediscoveredBytes == corruptBytes,
+              "restart recovery retains the original bytes")
+        check(FileManager.default.fileExists(atPath: recoveryURL.path),
+              "preserved recovery file still exists")
+
+        // Exercise a path alias, as macOS can expose the same directory via
+        // /var and /private/var or through another symlink.
+        let aliasDirectory = dir.appendingPathComponent("alias-to-test-folder")
+        try FileManager.default.createSymbolicLink(at: aliasDirectory,
+                                                   withDestinationURL: dir)
+        let aliasURL = aliasDirectory.appendingPathComponent("corrupt.json")
+        guard let aliasRecoveredURL = ConversationFileRecovery.mostRecentRecovery(for: aliasURL) else {
+            fatalError("Recovery missing when folder is reached through a symlink")
+        }
+        check(aliasRecoveredURL.lastPathComponent == recoveryURL.lastPathComponent,
+              "recovery found through an alias path")
+        let aliasBytes = try Data(contentsOf: aliasRecoveredURL)
+        check(aliasBytes == corruptBytes,
+              "recovery through alias retains exact bytes")
         // A valid file with an unsafe annotation should not destroy its text.
         let unsafe = """
         [{"id":"11111111-1111-4111-8111-111111111111","title":"Old chat",

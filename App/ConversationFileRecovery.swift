@@ -45,18 +45,31 @@ enum ConversationFileRecovery {
     /// Keep recovery copies discoverable after subsequent launches. Recovery
     /// must not depend on an in-memory URL from the failure session.
     static func mostRecentRecovery(for fileURL: URL) -> URL? {
-        let directory = fileURL.deletingLastPathComponent()
+        let fm = FileManager.default
+        let folder = fileURL.deletingLastPathComponent()
         let prefix = fileURL.lastPathComponent + ".recovery-"
-        let candidates = (try? FileManager.default.contentsOfDirectory(
-            at: directory, includingPropertiesForKeys: [.contentModificationDateKey],
-            options: [.skipsHiddenFiles])) ?? []
-        return candidates
-            .filter { $0.lastPathComponent.hasPrefix(prefix) && $0.pathExtension == "json" }
-            .max {
-                let a = (try? $0.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? .distantPast
-                let b = (try? $1.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? .distantPast
-                return a < b
-            }
+
+        // Enumerate *names* instead of URL objects with attached resource
+        // values; Apple filesystems can represent the same path differently.
+        guard let names = try? fm.contentsOfDirectory(atPath: folder.path) else {
+            return nil
+        }
+        var matches: [(url: URL, modified: Date)] = []
+        for name in names {
+            guard name.hasPrefix(prefix), name.hasSuffix(".json") else { continue }
+            let token = String(name.dropFirst(prefix.count).dropLast(5))
+            guard UUID(uuidString: token) != nil else { continue }
+            let url = folder.appendingPathComponent(name, isDirectory: false)
+            guard let attributes = try? fm.attributesOfItem(atPath: url.path),
+                  (attributes[.type] as? FileAttributeType) == .typeRegular else { continue }
+            let modified = (attributes[.modificationDate] as? Date) ?? .distantPast
+            matches.append((url, modified))
+        }
+        return matches.max {
+            $0.modified == $1.modified
+              ? $0.url.lastPathComponent < $1.url.lastPathComponent
+              : $0.modified < $1.modified
+        }?.url
     }
 
     private static func quarantine<Value>(_ fileURL: URL, reason: String) -> Load<Value> {

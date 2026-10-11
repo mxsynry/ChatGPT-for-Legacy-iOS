@@ -18,6 +18,8 @@ jobs:
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
       - name: Portable regressions and syntax checks
+        id: preflight
+        continue-on-error: true
         shell: bash
         run: |
           set -o pipefail
@@ -54,10 +56,15 @@ jobs:
           zip -qr "$GITHUB_WORKSPACE/OpenChat16-V22-unsigned.ipa" Payload
       - name: Upload compiled IPA candidate
         uses: actions/upload-artifact@v4
-        if: success()
+        if: success() && steps.preflight.outcome == 'success'
         with:
           name: OpenChat16-V22-unsigned
           path: OpenChat16-V22-unsigned.ipa
+      - name: Fail if portable checks failed
+        if: always() && steps.preflight.outcome == 'failure'
+        run: |
+          echo 'Preflight failed. Compilation was attempted for diagnostics; no IPA released.'
+          exit 1
       - name: Upload build diagnostics even if compile fails
         uses: actions/upload-artifact@v4
         if: always()
