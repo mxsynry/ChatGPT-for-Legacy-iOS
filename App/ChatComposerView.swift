@@ -4,6 +4,7 @@ import PhotosUI
 /// iOS 16 implementation inspired by the official 2026 app's distinct
 /// composer, tool menu and long-press send/model-selection components.
 struct ChatComposerView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Binding var input: String
     @Binding var selectedPhoto: PhotosPickerItem?
     @Binding var webSearch: Bool
@@ -40,6 +41,9 @@ struct ChatComposerView: View {
                     }
                 }
                 .padding(.horizontal, 3)
+                .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
+                .animation(reduceMotion ? nil : BackportMotion.menu,
+                           value: imageAttached || documentName != nil || webSearch)
             }
             HStack(alignment: .bottom, spacing: 7) {
                 PhotosPicker(selection: $selectedPhoto, matching: .images) {
@@ -53,7 +57,7 @@ struct ChatComposerView: View {
                 Menu {
                     Button(action: onCamera) { Label("Take photo", systemImage: "camera") }
                     Button(action: onDocument) { Label("Attach document", systemImage: "doc") }
-                    Button { webSearch.toggle() } label: {
+                    Button { BackportMotion.selectionHaptic(); webSearch.toggle() } label: {
                         Label(webSearch ? "Turn off web search" : "Use web search", systemImage: "globe")
                     }
                     Button(action: onModelPicker) { Label("Choose model", systemImage: "cpu") }
@@ -79,7 +83,10 @@ struct ChatComposerView: View {
                     .accessibilityLabel(isRecording ? "Finish dictation" : "Dictate message")
                 }
 
-                Button(action: isGenerating ? onStop : onSend) {
+                Button {
+                    BackportMotion.confirmationHaptic()
+                    if isGenerating { onStop() } else { onSend() }
+                } label: {
                     Image(systemName: isGenerating ? "stop.fill" : "arrow.up")
                         .font(.headline)
                         .foregroundColor(Color(.systemBackground))
@@ -105,7 +112,10 @@ struct ChatComposerView: View {
     }
 
     private func chip(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        Button {
+            BackportMotion.selectionHaptic()
+            action()
+        } label: {
             Label(title + " ×", systemImage: icon)
                 .font(.caption.weight(.medium))
                 .padding(.horizontal, 10)

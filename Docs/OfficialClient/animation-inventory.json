@@ -1,0 +1,360 @@
+[
+  {
+    "filename": "ChatGPT-1.2024.348.ipa",
+    "bytes": 35764427,
+    "sha256": "c3c26fc2f8ac02ec344bedf7b86a17e3a90e229cc9de32b7eef28b9321405324",
+    "fileCount": 568,
+    "fileTypes": {
+      ".strings": 256,
+      ".css": 90,
+      ".plist": 73,
+      ".lzfse": 64,
+      "": 21,
+      ".xcprivacy": 17,
+      ".txt": 6,
+      ".png": 5,
+      ".supp": 4,
+      ".sinf": 4,
+      ".supx": 4,
+      ".supf": 4,
+      ".ahap": 4,
+      ".car": 3,
+      ".caf": 3,
+      ".json": 2,
+      ".actionsdata": 2,
+      ".py": 1,
+      ".otf": 1,
+      ".m4a": 1,
+      ".kw": 1,
+      ".js": 1,
+      ".metallib": 1
+    },
+    "extensions": [
+      "ShareExtension.appex",
+      "VoiceScreenSharing.appex",
+      "Widgets.appex"
+    ],
+    "featureBundles": [
+      "Apollo_Apollo.bundle",
+      "Apollo_ApolloAPI.bundle",
+      "Apollo_ApolloWebSocket.bundle",
+      "Assets_Assets.bundle",
+      "Auth0_Auth0.bundle",
+      "ChatGPTCore_ChatGPTVoiceCore.bundle",
+      "ChatGPT_ChatGPTDisclosures.bundle",
+      "ChatGPT_ChatGPTVoice.bundle",
+      "Datadog_DatadogCore.bundle",
+      "Device_DeviceHaptics.bundle",
+      "Factory_Factory.bundle",
+      "Highlightr_Highlightr.bundle",
+      "Kingfisher_Kingfisher.bundle",
+      "LiveKit_LiveKit.bundle",
+      "RevenueCat_RevenueCat_CustomEntitlementComputation.bundle",
+      "Segment_Segment.bundle",
+      "SnapKit_SnapKit.bundle",
+      "SwiftCSV_SwiftCSV.bundle",
+      "SwiftProtobuf_SwiftProtobuf.bundle",
+      "iosMath_iosMath.bundle"
+    ],
+    "version": {
+      "app": {
+        "CFBundleShortVersionString": "1.2024.348",
+        "MinimumOSVersion": "10.0",
+        "CFBundleIdentifier": "com.openai.chat"
+      },
+      "framework": {
+        "CFBundleShortVersionString": "1.0",
+        "MinimumOSVersion": "16.4",
+        "CFBundleIdentifier": "chatgpt.ChatGPT"
+      }
+    },
+    "proprietary3DAssetCount": 0,
+    "animations": [
+      {
+        "path": "Payload/ChatGPT.app/Device_DeviceHaptics.bundle/TrickleTap.ahap",
+        "bytes": 1445,
+        "sha256": "5fc50ebb1eeb89f09e5debb620341c95dd73e625e1bbabc28fd322b49b0d6d3f",
+        "kind": ".ahap",
+        "parseError": "JSONDecodeError"
+      },
+      {
+        "path": "Payload/ChatGPT.app/Device_DeviceHaptics.bundle/Boop.ahap",
+        "bytes": 1796,
+        "sha256": "fa0d0bcd05c32899616678f544368e24a3e1bfa6806d93bebbb010ad73b2a49b",
+        "kind": ".ahap",
+        "haptic": {
+          "events": 2,
+          "parameterCurves": 2
+        }
+      },
+      {
+        "path": "Payload/ChatGPT.app/Device_DeviceHaptics.bundle/Hangup.ahap",
+        "bytes": 742,
+        "sha256": "fa338b82758108f1ccf153e78387faf6c87b49eb7ddc8e548fa9f4e8d03b7480",
+        "kind": ".ahap",
+        "haptic": {
+          "events": 2,
+          "parameterCurves": 0
+        }
+      },
+      {
+        "path": "Payload/ChatGPT.app/Device_DeviceHaptics.bundle/FastSwoop.ahap",
+        "bytes": 1799,
+        "sha256": "4fcc77fb168026725573ff200d1da7f7952d4cdb863a997716e6050276b6e4f9",
+        "kind": ".ahap",
+        "haptic": {
+          "events": 2,
+          "parameterCurves": 2
+        }
+      }
+    ]
+  },
+  {
+    "filename": "com.openai.chat_1.2026.266_und3fined.ipa",
+    "bytes": 144966845,
+    "sha256": "8a0e2289e35b45f40606e9ed1350c333356425bcf39a649bc0a25a2ebb35cecd",
+    "fileCount": 2156,
+    "fileTypes": {
+      ".strings": 706,
+      ".png": 518,
+      ".orbitmesh": 195,
+      ".json": 164,
+      ".plist": 106,
+      ".valdimodule": 85,
+      "": 81,
+      ".lzma": 63,
+      ".supf": 32,
+      ".supp": 32,
+      ".orbitfaces": 30,
+      ".car": 22,
+      ".supx": 16,
+      ".sinf": 16,
+      ".xcprivacy": 15,
+      ".caf": 14,
+      ".sh": 12,
+      ".txt": 8,
+      ".metallib": 7,
+      ".ahap": 7,
+      ".js": 6,
+      ".css": 6,
+      ".lottie": 3,
+      ".html": 2,
+      ".actionsdata": 2,
+      ".lzfse": 2,
+      ".day": 1,
+      ".wav": 1,
+      ".otf": 1,
+      ".bin": 1,
+      ".md": 1,
+      ".ktx": 1
+    },
+    "extensions": [
+      "AskChatGPTActionExtension.appex",
+      "ChatGPTSearchSafariExtension.appex",
+      "FinanceKitBackgroundDeliveryExtension.appex",
+      "MessagesExtension.appex",
+      "NotificationServiceExtension.appex",
+      "ShareExtension.appex",
+      "VoiceScreenSharing.appex",
+      "Widgets.appex"
+    ],
+    "featureBundles": [
+      "Assets_Assets.bundle",
+      "ChatGPTAudioAttachments_ChatGPTAudioAttachments.bundle",
+      "ChatGPTAudioAttachments_ChatGPTAudioAttachmentsInterface.bundle",
+      "ChatGPTAvatar_ChatGPTAvatar.bundle",
+      "ChatGPTBeacons_ChatGPTBeacons.bundle",
+      "ChatGPTBirthday_ChatGPTBirthday.bundle",
+      "ChatGPTCalpico_CalpicoCoreUI.bundle",
+      "ChatGPTConnectors_ChatGPTConnectors.bundle",
+      "ChatGPTDisclosures_ChatGPTDisclosures.bundle",
+      "ChatGPTFinance_ChatGPTFinance.bundle",
+      "ChatGPTHealth_ChatGPTHealth.bundle",
+      "ChatGPTLockedChats_ChatGPTLockedChats.bundle",
+      "ChatGPTLogin_ChatGPTLogin.bundle",
+      "ChatGPTMedia_ChatGPTMedia.bundle",
+      "ChatGPTMemory_ChatGPTMemory.bundle",
+      "ChatGPTMessages_ChatGPTMessageRowParts.bundle",
+      "ChatGPTSharing_ChatGPTSharing.bundle",
+      "ChatGPTSkills_ChatGPTSkillsDirectory.bundle",
+      "ChatGPTVoice_ChatGPTVoice.bundle",
+      "ChatGPTVoice_ChatGPTVoiceAudio.bundle",
+      "ChatGPTWallet_ChatGPTWallet.bundle",
+      "ChatGPTWritingBlocks_ChatGPTWritingBlocks.bundle",
+      "CodexRemote_CodexRemoteCore.bundle",
+      "CodexRemote_CodexRemoteThread.bundle",
+      "Device_DeviceHaptics.bundle",
+      "DotBall_DotBall.bundle",
+      "EmojiKit_EmojiKit.bundle",
+      "Factory_FactoryKit.bundle",
+      "Highlightr_Highlightr.bundle",
+      "Kingfisher_Kingfisher.bundle",
+      "Localization_Localization.bundle",
+      "OAIMarkdown_OAIMarkdown.bundle",
+      "OrbitCharacters_OrbitCharacters.bundle",
+      "PhoneNumberKit_PhoneNumberKit.bundle",
+      "RevenueCat_RevenueCat_CustomEntitlementComputation.bundle",
+      "Segment_Segment.bundle",
+      "Stripe_StripeCore.bundle",
+      "Stripe_StripePaymentSheet.bundle",
+      "Stripe_StripePayments.bundle",
+      "Stripe_StripePaymentsUI.bundle",
+      "Stripe_StripeUICore.bundle",
+      "Styleguide_SwiftUIStyleguide.bundle",
+      "SwiftCSV_SwiftCSV.bundle",
+      "Threads_Threads.bundle",
+      "TibroCore_TibroCore.bundle",
+      "mathFonts.bundle",
+      "swift-nio_NIOPosix.bundle"
+    ],
+    "version": {
+      "app": {
+        "CFBundleShortVersionString": "1.2026.266",
+        "MinimumOSVersion": "18.0",
+        "CFBundleIdentifier": "com.openai.chat"
+      },
+      "framework": {
+        "CFBundleShortVersionString": "1.0",
+        "MinimumOSVersion": "18.0",
+        "CFBundleIdentifier": "com.openai.frameworks.chatgpt"
+      }
+    },
+    "proprietary3DAssetCount": 225,
+    "animations": [
+      {
+        "path": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/ChatGPTBeacons_ChatGPTBeacons.bundle/birthday-bottom-sheet-in.lottie",
+        "bytes": 6257,
+        "sha256": "122d3c84fc1d02db80d38e5b7675f432b8cae7359ecfb7020b70629b10b8e02d",
+        "kind": ".lottie",
+        "animation": {
+          "name": "Bottom_Sheet_FullIn",
+          "fps": 60.0,
+          "startFrame": 0,
+          "endFrame": 59,
+          "durationSeconds": 0.983,
+          "size": [
+            1508,
+            728
+          ],
+          "layers": 25
+        }
+      },
+      {
+        "path": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/ChatGPTBeacons_ChatGPTBeacons.bundle/birthday-bottom-sheet-loop.lottie",
+        "bytes": 6268,
+        "sha256": "cca76a4e1d12e0c4f455a4bd8a37bdec65e83b0d128b5edc0d866f5cf3a14ea8",
+        "kind": ".lottie",
+        "animation": {
+          "name": "Bottom-Sheet-Loop",
+          "fps": 60.0,
+          "startFrame": 59,
+          "endFrame": 108,
+          "durationSeconds": 0.817,
+          "size": [
+            1508,
+            728
+          ],
+          "layers": 25
+        }
+      },
+      {
+        "path": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/TibroCore_TibroCore.bundle/orbit-creation-motion.json",
+        "bytes": 218224,
+        "sha256": "00da3849482e3200f95ae50708d6416c2df49da8a073178e25d87f7d3e0e6aa2",
+        "kind": ".json",
+        "animation": {
+          "fps": 60,
+          "frames": 2835,
+          "loopStart": 1484,
+          "durationSeconds": 47.25,
+          "channelsPerFrame": 11
+        }
+      },
+      {
+        "path": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/Device_DeviceHaptics.bundle/PhoneGestureAccepted.ahap",
+        "bytes": 710,
+        "sha256": "f99044cc9bd5a24db45e676a301d98d23345e653df3fe33ec814aa79c078ce91",
+        "kind": ".ahap",
+        "haptic": {
+          "events": 2,
+          "parameterCurves": 0
+        }
+      },
+      {
+        "path": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/Device_DeviceHaptics.bundle/WidgetAttention.ahap",
+        "bytes": 735,
+        "sha256": "70738a3d83a1008d2dcbc6f118670e2292e695093dd6ded8e909a8cb95f1a96e",
+        "kind": ".ahap",
+        "haptic": {
+          "events": 2,
+          "parameterCurves": 0
+        }
+      },
+      {
+        "path": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/Device_DeviceHaptics.bundle/TrickleTap.ahap",
+        "bytes": 1445,
+        "sha256": "5fc50ebb1eeb89f09e5debb620341c95dd73e625e1bbabc28fd322b49b0d6d3f",
+        "kind": ".ahap",
+        "parseError": "JSONDecodeError"
+      },
+      {
+        "path": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/Device_DeviceHaptics.bundle/VoiceConnection.ahap",
+        "bytes": 1318,
+        "sha256": "12a6a7a419f72525cd5eff9f988ab1b9687dc31cd30b11718beceaf215c17aba",
+        "kind": ".ahap",
+        "haptic": {
+          "events": 4,
+          "parameterCurves": 0
+        }
+      },
+      {
+        "path": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/Device_DeviceHaptics.bundle/Boop.ahap",
+        "bytes": 1796,
+        "sha256": "fa0d0bcd05c32899616678f544368e24a3e1bfa6806d93bebbb010ad73b2a49b",
+        "kind": ".ahap",
+        "haptic": {
+          "events": 2,
+          "parameterCurves": 2
+        }
+      },
+      {
+        "path": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/Device_DeviceHaptics.bundle/Hangup.ahap",
+        "bytes": 742,
+        "sha256": "fa338b82758108f1ccf153e78387faf6c87b49eb7ddc8e548fa9f4e8d03b7480",
+        "kind": ".ahap",
+        "haptic": {
+          "events": 2,
+          "parameterCurves": 0
+        }
+      },
+      {
+        "path": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/Device_DeviceHaptics.bundle/FastSwoop.ahap",
+        "bytes": 1799,
+        "sha256": "4fcc77fb168026725573ff200d1da7f7952d4cdb863a997716e6050276b6e4f9",
+        "kind": ".ahap",
+        "haptic": {
+          "events": 2,
+          "parameterCurves": 2
+        }
+      },
+      {
+        "path": "Payload/ChatGPT.app/Frameworks/ChatGPT.framework/ChatGPTBirthday_ChatGPTBirthday.bundle/birthday-splash.lottie",
+        "bytes": 3260,
+        "sha256": "10121e4969a5133f9640bdd0f1833e3d610c5475eda8c103f4b506318b0e6db4",
+        "kind": ".lottie",
+        "animation": {
+          "name": "Splash_lottie-withText",
+          "fps": 60.0,
+          "startFrame": 0,
+          "endFrame": 159,
+          "durationSeconds": 2.65,
+          "size": [
+            1572,
+            3408
+          ],
+          "layers": 17
+        }
+      }
+    ]
+  }
+]

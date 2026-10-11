@@ -17,10 +17,14 @@ struct ChatMessage: Identifiable, Codable {
     var text: String
     var imageDataURL: String? = nil
     var citations: [ResponseCitation] = []
+    // Retain partial text visibly but do not reuse it as completed model context.
+    var isInterrupted: Bool = false
 
-    enum CodingKeys: String, CodingKey { case id, role, text, imageDataURL, citations }
-    init(id: UUID = UUID(), role: String, text: String, imageDataURL: String? = nil, citations: [ResponseCitation] = []) {
-        self.id = id; self.role = role; self.text = text; self.imageDataURL = imageDataURL; self.citations = citations
+    enum CodingKeys: String, CodingKey { case id, role, text, imageDataURL, citations, isInterrupted }
+    init(id: UUID = UUID(), role: String, text: String, imageDataURL: String? = nil,
+         citations: [ResponseCitation] = [], isInterrupted: Bool = false) {
+        self.id = id; self.role = role; self.text = text; self.imageDataURL = imageDataURL
+        self.citations = citations; self.isInterrupted = isInterrupted
     }
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -31,6 +35,7 @@ struct ChatMessage: Identifiable, Codable {
         // An invalid source annotation must not make an entire chat history
         // unreadable. Drop unsafe citations while preserving the messages.
         citations = (try? c.decodeIfPresent([ResponseCitation].self, forKey: .citations)) ?? []
+        isInterrupted = try c.decodeIfPresent(Bool.self, forKey: .isInterrupted) ?? false
     }
 }
 struct LocalConversation: Identifiable, Codable {
@@ -247,6 +252,14 @@ struct LocalConversation: Identifiable, Codable {
             noteStreamingChange()
         }
     }
+    func markInterrupted(_ messageID: UUID, in conversationID: UUID) {
+        guard let c = conversations.firstIndex(where: { $0.id == conversationID }),
+              let m = conversations[c].messages.firstIndex(where: { $0.id == messageID }),
+              conversations[c].messages[m].role == "assistant" else { return }
+        conversations[c].messages[m].isInterrupted = true
+        persist()
+    }
+
     func flushStreamingChanges() {
         persist()
         lastStreamPersistence = Date()

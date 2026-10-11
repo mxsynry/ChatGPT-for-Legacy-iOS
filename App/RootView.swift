@@ -63,6 +63,7 @@ struct RootView: View {
     @State private var generationStatus: String?
     @State private var requestError: String?
     @State private var lastBackendIssue: BackendDiagnostic?
+    @State private var pendingStreamRetry: ResponseRetryContext?
     @State private var confirmDelete = false
     @State private var exportURL: URL?
     @State private var showExport = false
@@ -824,13 +825,19 @@ struct RootView: View {
                 }
                 if activeTask != nil {
                     HStack(spacing: 8) {
-                        ProgressView().controlSize(.small)
+                        BackportActivityDots()
                         Text(generationStatus ?? "Waiting for response…")
                             .font(.caption).foregroundColor(.secondary)
                         Spacer()
                     }
                     .padding(.horizontal, 18).padding(.bottom, 3)
                     .accessibilityElement(children: .combine)
+                }
+                if let recovery = pendingStreamRetry,
+                   selected?.id == recovery.conversationID, activeTask == nil {
+                    StreamRetryBanner(state: recovery,
+                                     onRetry: { retryInterruptedResponse() },
+                                     onDismiss: { pendingStreamRetry = nil })
                 }
                 chatComposer
             }
@@ -1123,14 +1130,22 @@ struct RootView: View {
         }
     }
 
-    private func runResponse(in conversationID: UUID) {
+    private func runResponse(in conversationID: UUID,
+                             historyOverride: [ChatMessage]? = nil,
+                             modelOverride: String? = nil,
+                             searchOverride: Bool? = nil) {
         guard activeTask == nil,
               let chat = store.conversations.first(where: { $0.id == conversationID }) else { return }
         guard hasSelectedCredentials else {
             requestError = "Select an authorized ChatGPT plan or configure API-key billing in Settings."
             return
         }
-        let history = chat.messages
+        let history = historyOverride ?? chat.messages
+        // A manual retry is only allowed for the same user message and
+        // sends the original prompt prefix, never a truncated assistant turn.
+        let triggeringUserID = history.last(where: { $0.role == "user" })?.id
+        pendingStreamRetry = nil
+        lastBackendIssue = nil
         store.append("", role: "assistant", to: conversationID)
         guard let messageID = store.conversations.first(where: { $0.id == conversationID })?.messages.last?.id else { return }
         activeConversation = conversationID
@@ -1138,8 +1153,8 @@ struct RootView: View {
         activeAssistantMessageID = messageID
         let requestID = UUID()
         activeRequest = requestID
-        let chosenModel = chat.modelID ?? model
-        let searchEnabled = useWebSearch
+        let chosenModel = modelOverride ?? chat.modelID ?? model
+        let searchEnabled = searchOverride ?? useWebSearch
         activeTask = Task {
             do {
                 try await client.stream(messages: history, model: chosenModel, webSearch: searchEnabled,
@@ -1186,10 +1201,41 @@ struct RootView: View {
                     let content = store.conversations.first(where: { $0.id == conversationID })?
                         .messages.first(where: { $0.id == messageID })?.text ?? ""
                     if content.isEmpty { store.removeMessage(messageID, in: conversationID) }
-                    if case ClientError.diagnostic(let diagnostic) = error {
-                        lastBackendIssue = diagnostic
+                    if let triggeringUserID = triggeringUserID,
+                       let incident = error as? ClientError {
+                        switch incident {
+                        case .interrupted(let detail):
+                            if !content.isEmpty { store.markInterrupted(messageID, in: conversationID) }
+                            pendingStreamRetry = ResponseRetryContext(
+                                conversationID: conversationID,
+                                triggeringUserID: triggeringUserID,
+                                failedAssistantID: messageID,
+                                modelID: chosenModel, webSearchEnabled: searchEnabled,
+                                retryAfter: nil, isRateLimited: false,
+                                reason: detail.errorDescription ?? "Stream interrupted.",
+                                receivedPartialText: !content.isEmpty)
+                            requestError = nil
+                        case .diagnostic(let diagnostic) where diagnostic.httpStatus == 429:
+                            if !content.isEmpty { store.markInterrupted(messageID, in: conversationID) }
+                            lastBackendIssue = diagnostic
+                            pendingStreamRetry = ResponseRetryContext(
+                                conversationID: conversationID,
+                                triggeringUserID: triggeringUserID,
+                                failedAssistantID: messageID,
+                                modelID: chosenModel, webSearchEnabled: searchEnabled,
+                                retryAfter: diagnostic.retryAfter, isRateLimited: true,
+                                reason: diagnostic.errorDescription ?? "Request rate-limited.",
+                                receivedPartialText: !content.isEmpty)
+                            requestError = nil
+                        case .diagnostic(let diagnostic):
+                            lastBackendIssue = diagnostic
+                            requestError = diagnostic.errorDescription
+                        default:
+                            requestError = incident.localizedDescription
+                        }
+                    } else {
+                        requestError = error.localizedDescription
                     }
-                    requestError = error.localizedDescription
                 }
             }
             if activeRequest == requestID {
@@ -1204,6 +1250,22 @@ struct RootView: View {
                 activeRequest = nil
             }
         }
+    }
+
+    /// Only the explicit button starts another billed API call. We neither
+    /// replay an already-completed request automatically nor claim to fetch
+    /// the prior server response (our API payload has store=false).
+    private func retryInterruptedResponse() {
+        guard activeTask == nil, let state = pendingStreamRetry,
+              selected?.id == state.conversationID,
+              (state.retryAfter ?? .distantPast) <= Date(),
+              let chat = store.conversations.first(where: { $0.id == state.conversationID }),
+              let history = state.inputForManualRetry(chat.messages) else {
+            return
+        }
+        followLatest = true
+        runResponse(in: state.conversationID, historyOverride: history,
+                    modelOverride: state.modelID, searchOverride: state.webSearchEnabled)
     }
 
     private func discardEmptyActivePlaceholder() {

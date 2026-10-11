@@ -21,9 +21,12 @@ import Foundation
               "streaming fragments appended in order")
         check(store.streamingTick == 150, "stream tick advances")
         let before = store.conversations[0].messages.last!.text
+        store.markInterrupted(assistantID, in: id)
         store.flushStreamingChanges()
         let restored = ConversationStore(storageURL: fileURL)
         check(restored.conversations.first?.messages.last?.text == before, "flush persists all stream deltas")
+        check(restored.conversations.first?.messages.last?.isInterrupted == true,
+              "interrupted partial reply is marked after relaunch")
         store.setPinned(id, true)
         store.setArchived(id, true)
         store.setLocked(id, true)

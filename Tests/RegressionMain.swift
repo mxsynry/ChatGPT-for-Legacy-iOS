@@ -6,8 +6,10 @@ struct ChatMessage {
     let role: String
     let text: String
     let imageDataURL: String?
-    init(role: String, text: String, imageDataURL: String? = nil) {
+    let isInterrupted: Bool
+    init(role: String, text: String, imageDataURL: String? = nil, isInterrupted: Bool = false) {
         self.role = role; self.text = text; self.imageDataURL = imageDataURL
+        self.isInterrupted = isInterrupted
     }
 }
 
@@ -510,6 +512,14 @@ struct LocalConversation {
         if case .progress(let status) = toolProgress {
             check(status == "Searching web…", "web-search progress appears before text")
         } else { check(false, "web-search progress appears before text") }
+        let interruptionFiltered = ResponsesPayload(messages: [
+            ChatMessage(role: "user", text: "original prompt"),
+            ChatMessage(role: "assistant", text: "partial output", isInterrupted: true),
+            ChatMessage(role: "assistant", text: "full retry answer")
+        ], model: "gpt-test", webSearch: false)
+        let filteredJSON = String(data: try JSONEncoder().encode(interruptionFiltered), encoding: .utf8)!
+        check(!filteredJSON.contains("partial output") && filteredJSON.contains("full retry answer"),
+              "interrupted visible text excluded from later model context")
         print("PASS: \(passed) source regression checks")
     }
 }

@@ -33,6 +33,10 @@ struct MessageRowView: View {
                     MessageContentView(text: message.text.isEmpty ? "…" : message.text)
                 }
                 if message.role == "assistant" {
+                    if message.isInterrupted {
+                        Label("Interrupted response", systemImage: "exclamationmark.circle")
+                            .font(.caption).foregroundColor(.secondary)
+                    }
                     MessageSourcesView(sources: message.citations)
                 }
             }

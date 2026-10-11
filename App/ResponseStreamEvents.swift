@@ -61,7 +61,7 @@ enum ParsedResponseEvent {
     case citation(ResponseCitation)
     case completed([ResponseCitation], ResponseUsage?)
     case failed(String)
-    case incomplete
+    case incomplete(String?)
     case ignore
 }
 
@@ -103,7 +103,11 @@ enum ResponseStreamEvents {
             let response = json["response"] as? [String: Any]
             let error = response?["error"] as? [String: Any]
             return .failed((error?["message"] as? String) ?? (error?["code"] as? String) ?? "Response failed")
-        case "response.incomplete": return .incomplete
+        case "response.incomplete":
+            let response = json["response"] as? [String: Any]
+            let detail = response?["incomplete_details"] as? [String: Any]
+            let reason = (detail?["reason"] as? String).map { String($0.prefix(120)) }
+            return .incomplete(reason)
         case "error":
             let error = json["error"] as? [String: Any]
             return .failed((error?["message"] as? String) ?? (json["message"] as? String) ?? "Streaming error")

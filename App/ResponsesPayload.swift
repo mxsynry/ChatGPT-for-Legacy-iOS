@@ -39,7 +39,9 @@ struct ResponsesPayload: Encodable {
         self.model = model
         self.instructions = branchMode.instructions
         self.reasoning = reasoningEffort.apiValue.map { Reasoning(effort: $0) }
-        input = messages.map { message in
+        // Interrupted partial assistant output remains visible locally, but
+        // must never become authoritative completed context in later requests.
+        input = messages.filter { $0.role != "assistant" || !$0.isInterrupted }.map { message in
             if message.role == "user", let image = message.imageDataURL {
                 let parts = [
                     Part(type: "input_text", text: message.text, image_url: nil),

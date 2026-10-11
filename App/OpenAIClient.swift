@@ -1,14 +1,14 @@
 import Foundation
 
 enum ClientError: LocalizedError {
-    case noKey, invalidResponse, api(String), diagnostic(BackendDiagnostic), incomplete
+    case noKey, invalidResponse, api(String), diagnostic(BackendDiagnostic), interrupted(StreamInterruption)
     var errorDescription: String? {
         switch self {
         case .noKey: return "Continue with ChatGPT or add an API key in Settings."
         case .invalidResponse: return "Invalid server response."
         case .api(let text): return text
         case .diagnostic(let issue): return issue.errorDescription
-        case .incomplete: return "Stream ended before completion."
+        case .interrupted(let event): return event.errorDescription
         }
     }
 }
@@ -67,10 +67,10 @@ actor OpenAIClient {
             branchMode: branchMode, reasoningEffort: reasoningEffort))
         let (bytes, response) = try await URLSession.shared.bytes(for: request)
         guard let http = response as? HTTPURLResponse else { throw ClientError.invalidResponse }
-        if let snapshot = RateLimitHeaders.parse(
-            http.allHeaderFields.reduce(into: [String: String]()) { result, item in
-                if let key = item.key as? String { result[key] = "\(item.value)" }
-            }) {
+        let headers = http.allHeaderFields.reduce(into: [String: String]()) { result, item in
+            if let key = item.key as? String { result[key] = "\(item.value)" }
+        }
+        if let snapshot = RateLimitHeaders.parse(headers) {
             await onRateLimits(snapshot)
         }
         guard (200..<300).contains(http.statusCode) else {
@@ -81,10 +81,14 @@ actor OpenAIClient {
             }
             throw ClientError.diagnostic(BackendDiagnostic.parse(
                 body, status: http.statusCode,
-                requestID: http.value(forHTTPHeaderField: "x-request-id")))
+                requestID: http.value(forHTTPHeaderField: "x-request-id"),
+                headers: headers))
         }
         var collector = SSEFrameCollector()
         var completed = false
+        var receivedText = false
+        var eventCount = 0
+        let requestID = http.value(forHTTPHeaderField: "x-request-id")
         var seenURLs = Set<String>()
         var textBatcher = StreamingTextBatcher()
         func deliverPendingText() async {
@@ -92,8 +96,10 @@ actor OpenAIClient {
         }
         func handle(_ payload: String) async throws {
             if payload == "[DONE]" { return }
+            eventCount += 1
             switch ResponseStreamEvents.parse(payload) {
             case .delta(let delta):
+                if !delta.isEmpty { receivedText = true }
                 if let text = textBatcher.push(delta) { await onDelta(text) }
             case .progress(let status):
                 await onProgress(status)
@@ -110,20 +116,39 @@ actor OpenAIClient {
             case .failed(let reason):
                 await deliverPendingText()
                 throw ClientError.api(reason)
-            case .incomplete:
+            case .incomplete(let reason):
                 await deliverPendingText()
-                throw ClientError.incomplete
+                throw ClientError.interrupted(StreamInterruption(
+                    cause: .serverIncomplete, reason: reason, requestID: requestID,
+                    eventsReceived: eventCount, receivedText: receivedText))
             case .ignore: break
             }
         }
-        for try await line in bytes.lines {
+        do {
+            for try await line in bytes.lines {
+                try Task.checkCancellation()
+                if let payload = try collector.consume(line) { try await handle(payload) }
+                if completed { break }
+            }
             try Task.checkCancellation()
-            if let payload = try collector.consume(line) { try await handle(payload) }
+            if let final = collector.finish() { try await handle(final) }
+        } catch is CancellationError {
+            await deliverPendingText()
+            throw CancellationError()
+        } catch let clientError as ClientError {
+            throw clientError
+        } catch {
+            await deliverPendingText()
+            throw ClientError.interrupted(StreamInterruption(
+                cause: .connectionError, reason: nil, requestID: requestID,
+                eventsReceived: eventCount, receivedText: receivedText))
         }
-        try Task.checkCancellation()
-        if let final = collector.finish() { try await handle(final) }
         await deliverPendingText()
-        guard completed else { throw ClientError.incomplete }
+        guard completed else {
+            throw ClientError.interrupted(StreamInterruption(
+                cause: .connectionClosed, reason: nil, requestID: requestID,
+                eventsReceived: eventCount, receivedText: receivedText))
+        }
     }
 }
 
