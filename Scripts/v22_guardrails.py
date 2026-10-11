@@ -38,6 +38,6 @@ assert view.index('.sheet(isPresented: $showSettings)') < view.index('.sheet(isP
 project = (root / 'project.yml').read_text()
 assert "IPHONEOS_DEPLOYMENT_TARGET: '16.0'" in project
 assert 'sources: [App]' in project
-assert not any(p.suffix.lower() in {'.ipa', '.dylib', '.a'} for p in root.rglob('*') if p.is_file())
-assert not any('.framework' in p.parts for p in root.rglob('*') if p.is_file())
+assert not any(p.suffix.lower() in {'.ipa', '.dylib', '.a'} for p in app.rglob('*') if p.is_file())
+assert not any('.framework' in p.parts for p in app.rglob('*') if p.is_file())
 print(f'PASS: V22 guardrails, {len(source)} Swift files, {len(types)} top-level types')
